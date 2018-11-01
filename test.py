@@ -19,7 +19,7 @@ def test_request():
     assert tsession.request
 
 def test_cookies():
-    assert tsession.cookies
+    assert tsession.cookie
 
 def test_tarallo_login():
     assert tsession.request.status_code == 204
