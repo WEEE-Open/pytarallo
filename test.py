@@ -1,7 +1,26 @@
 from tarallo import Tarallo
+from os import environ as env
 
-cfg_file = "devcfg.json"
+try:
+    t_url = env['TARALLO_URL']
+    t_user = env['TARALLO_USER']
+    t_pass = env['TARALLO_PASS']
+except KeyError:
+    exit(1)
 
-session = Tarallo(cfg_file)
+tsession = Tarallo(t_url, t_user, t_pass)
 
-print(session.url)
+def test_create_session():
+    assert tsession
+
+tsession.login()
+
+def test_request():
+    assert tsession.request
+
+def test_cookies():
+    assert tsession.cookies
+
+def test_tarallo_login():
+    assert tsession.request.status_code == 204
+

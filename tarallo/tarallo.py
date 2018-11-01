@@ -10,15 +10,16 @@ class Tarallo(object):
         self.url = url
         self.user = user
         self.passwd = passwd
+        self.request = None
         self.cookie = None
  
     def login(self):
         """Login on TARALLO"""
-        # TODO: To be implemented
+        # TODO: To be implemented (copy from the goddamn bot)
         pass
     
     def logout(self):
         """Logout from TARALLO"""
-        # TODO: To be implemented
+        # TODO: To be implemented (same as login)
         pass
 
