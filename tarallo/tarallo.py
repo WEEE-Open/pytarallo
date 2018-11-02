@@ -46,3 +46,8 @@ class Item(object):
         # TODO: To be implemented
         pass
 
+    def move_to(self, position):
+        """Move an item to another position"""
+        # TODO: To be implemented
+        pass
+
