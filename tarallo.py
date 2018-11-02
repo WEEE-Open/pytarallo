@@ -66,3 +66,8 @@ class Item(object):
         # TODO: To be implemented
         pass
  
+
+def get_tsession():
+    print(tsession)
+    return tsession
+
