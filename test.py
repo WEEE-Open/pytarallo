@@ -1,4 +1,4 @@
-from tarallo import Tarallo
+from tarallo import tsession, Tarallo, Item
 from os import environ as env
 
 try:
@@ -9,12 +9,10 @@ except KeyError:
     exit(1)
 
 tsession = Tarallo(t_url, t_user, t_pass)
-
 def test_create_session():
     assert tsession
 
 tsession.login()
-
 def test_request():
     assert tsession.request
 
