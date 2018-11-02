@@ -26,6 +26,12 @@ class Tarallo(object):
         # TODO: To be implemented (copy from the goddamn bot)
         pass
 
+    def whoami(self):
+        """Test login and returns who are you"""
+        # Just make an HTTP request at /v1/session and parse the json
+        # TODO: To be implemented
+        pass
+
     @staticmethod
     def get_item(code):
         """This method should return an Item instance"""
