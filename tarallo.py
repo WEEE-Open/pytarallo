@@ -18,39 +18,40 @@ class Tarallo(object):
         self.url = url
         self.user = user
         self.passwd = passwd
-        self.request = None  # Last request headers
+        self.request = None  # Last request
         self.cookie = None
 
+    def cookie_check(self):
+        """Check the cookie status"""
+        # Just move the first pat of the login method here and call it in the login() method
+        # TODO: To be implemented
+        pass
+
     def login(self):
+        """Login on Tarallo"""
         if self.cookie is not None:
-            whoami=requests.get(TARALLO_URL+'/v1/session', cookies=self.cookie)
-            last_status=whoami.status_code
-            self.request=whoami  
+            whoami = requests.get(TARALLO_URL + '/v1/session', cookies=self.cookie)
+            last_status = whoami.status_code
+            self.request = whoami  
             
-            if self.request.status_code==200:
+            if self.request.status_code == 200:
                 return True
-            if self.request.status_code!=403:
+            if self.request.status_code != 403:
                 return False
 
-        body=dict()
-        body['username']=self.user
-        body['password']=self.passwd
-        headers={"Content-Type":"application/json"}
-        res=requests.post(TARALLO_URL+ '/v1/session', data=json.dumps(body),headers=headers)
-        last_status=res.status_code
-        self.request=res
+        body = dict()
+        body['username'] = self.user
+        body['password'] = self.passwd
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(TARALLO_URL + '/v1/session', data=json.dumps(body), headers=headers)
+        last_status = res.status_code
+        self.request = res
 
-        if self.request.status_code==204:
-            self.cookie=self.request.cookies
+        if self.request.status_code == 204:
+            self.cookie = self.request.cookies
             return True
         else:
             return False
-        
-    def whoami(self):
-        """Test login and returns who are you"""
-        # Just make an HTTP request at /v1/session and parse the json
-        # TODO: To be implemented
-        pass
 
     @staticmethod
     def get_item(code):
