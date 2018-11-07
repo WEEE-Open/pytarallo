@@ -20,11 +20,14 @@ status = tarallo.tsession.status()
 def test_status_before_login():
     assert status == False
 
+def test_logout_before_login():
+    assert tarallo.tsession.logout() == False
+
 login = tarallo.tsession.login()
-def test_request():
+def test_tarallo_request():
     assert tarallo.tsession.request
 
-def test_cookies():
+def test_tarallo_cookie():
     assert tarallo.tsession.cookie
 
 def test_tarallo_login():
@@ -33,4 +36,7 @@ def test_tarallo_login():
 
 def test_status_after_login():
     assert tarallo.tsession.status() == True
+
+def test_tarallo_logout():
+    assert tarallo.tsession.logout() == True
 

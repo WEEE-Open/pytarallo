@@ -19,5 +19,5 @@ Install the `nose` test suite
 `pip install nose`  
 ### 4. Run tests
 To run tests type  
-`nosetests`  
+`nosetests -v`  
 
