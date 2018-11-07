@@ -20,12 +20,13 @@ class Tarallo(object):
     def status(self):
         """Check the cookie status"""
         if self.cookie is not None:
-            self.request= requests.get(self.url + '/v1/session', cookies=self.cookie)
-            
+            self.request = requests.get(self.url + '/v1/session', cookies=self.cookie) 
             if self.request.status_code == 200:
                 return True
             if self.request.status_code != 403:
                 return False
+        else:
+            return False
 
     def login(self):
         """Login on Tarallo"""
