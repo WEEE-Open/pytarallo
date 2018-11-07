@@ -18,7 +18,13 @@ class Tarallo(object):
         self.cookie = None
 
     def status(self):
-        """Check the cookie status"""
+        """
+        Check the session status
+        
+        :return:
+            True if session is valid
+            False if session has expired or user is not authenticated
+        """
         if self.cookie is not None:
             self.request = requests.get(self.url + '/v1/session', cookies=self.cookie) 
             if self.request.status_code == 200:
@@ -28,6 +34,11 @@ class Tarallo(object):
         else:
             return False
 
+    def last_status(self):
+        """Check the last request status without checking the session cookie"""
+        # TODO: To be implemented
+        pass
+    
     def login(self):
         """Login on Tarallo"""
         body = dict()
