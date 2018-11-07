@@ -1,6 +1,3 @@
-"""
-Python T.A.R.A.L.L.O. API
-"""
 import os
 import json
 import requests
@@ -10,7 +7,6 @@ This variable contains the Tarallo() instance for the working session.
 This is meant to be imported in the final script and allocated in there.
 """
 tsession = None
-
 
 class Tarallo(object):
     """This class handles the Tarallo session"""
@@ -23,29 +19,21 @@ class Tarallo(object):
 
     def cookie_check(self):
         """Check the cookie status"""
-        # Just move the first pat of the login method here and call it in the login() method
-        # TODO: To be implemented
-        pass
-
-    def login(self):
-        """Login on Tarallo"""
         if self.cookie is not None:
-            whoami = requests.get(TARALLO_URL + '/v1/session', cookies=self.cookie)
-            last_status = whoami.status_code
-            self.request = whoami  
+            self.request= requests.get(self.url + '/v1/session', cookies=self.cookie)
             
             if self.request.status_code == 200:
                 return True
             if self.request.status_code != 403:
                 return False
 
+    def login(self):
+        """Login on Tarallo"""
         body = dict()
         body['username'] = self.user
         body['password'] = self.passwd
         headers = {"Content-Type": "application/json"}
-        res = requests.post(TARALLO_URL + '/v1/session', data=json.dumps(body), headers=headers)
-        last_status = res.status_code
-        self.request = res
+        self.request = requests.post(self.url + '/v1/session', data=json.dumps(body), headers=headers)
 
         if self.request.status_code == 204:
             self.cookie = self.request.cookies
@@ -97,4 +85,3 @@ class Item(object):
 def get_tsession():
     print(tsession)
     return tsession
-
