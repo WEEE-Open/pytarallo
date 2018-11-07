@@ -17,7 +17,7 @@ class Tarallo(object):
         self.request = None  # Last request
         self.cookie = None
 
-    def cookie_check(self):
+    def status(self):
         """Check the cookie status"""
         if self.cookie is not None:
             self.request= requests.get(self.url + '/v1/session', cookies=self.cookie)
@@ -83,5 +83,5 @@ class Item(object):
  
 
 def get_tsession():
-    print(tsession)
     return tsession
+

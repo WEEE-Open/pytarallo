@@ -16,7 +16,10 @@ def test_create_session():
 def test_equal_tsession():
     assert tarallo.tsession == tarallo.get_tsession()
 
-tarallo.tsession.login()
+def test_status_before_login():
+    assert tarallo.tsession.status() == False
+
+login = tarallo.tsession.login()
 def test_request():
     assert tarallo.tsession.request
 
@@ -25,4 +28,8 @@ def test_cookies():
 
 def test_tarallo_login():
     assert tarallo.tsession.request.status_code == 204
+    assert login == True
+
+def test_status_post_login():
+    assert tarallo.tsession.status() == True
 
