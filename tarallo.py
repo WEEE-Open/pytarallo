@@ -84,9 +84,9 @@ class Item(object):
         # TODO: To be implemented
         pass
 
-    def move_to(self, position):
+    def move_to(self, location):
         """
-        Move an item to another position
+        Move an item to another location
         Grab needed stuff from the tsession variable
         and use the tsession for pushing edits
         """
