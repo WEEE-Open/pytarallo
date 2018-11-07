@@ -33,11 +33,6 @@ class Tarallo(object):
                 return False
         else:
             return False
-
-    def last_status(self):
-        """Check the last request status without checking the session cookie"""
-        # TODO: To be implemented
-        pass
     
     def login(self):
         """Login on Tarallo"""

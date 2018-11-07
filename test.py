@@ -28,7 +28,7 @@ def test_cookies():
     assert tarallo.tsession.cookie
 
 def test_tarallo_login():
-    assert tarallo.tsession.last_status() == 204
+    assert tarallo.tsession.request.status_code == 204
     assert login == True
 
 def test_status_after_login():
