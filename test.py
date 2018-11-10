@@ -40,3 +40,6 @@ def test_status_after_login():
 def test_tarallo_logout():
     assert tarallo.tsession.logout() == True
 
+def test_tarallo_cookie_after_logout():
+    assert tarallo.tsession.cookie == None
+
