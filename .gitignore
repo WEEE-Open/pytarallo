@@ -103,3 +103,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Dangerous proprietary software (that is actually free and open source)
+.idea
