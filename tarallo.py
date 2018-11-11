@@ -2,15 +2,16 @@ import os
 import json
 import requests
 
-
 """
 This variable contains the Tarallo() instance for the working session.
 This is meant to be imported in the final script and allocated in there.
 """
 tsession = None
 
+
 class Tarallo(object):
     """This class handles the Tarallo session"""
+
     def __init__(self, url, user, passwd):
         self.url = url
         self.user = user
@@ -27,14 +28,14 @@ class Tarallo(object):
             False if session has expired or user is not authenticated
         """
         if self.cookie is not None:
-            self.request = requests.get(self.url + '/v1/session', cookies=self.cookie) 
+            self.request = requests.get(self.url + '/v1/session', cookies=self.cookie)
             if self.request.status_code == 200:
                 return True
             if self.request.status_code != 403:
                 return False
         else:
             return False
-    
+
     def login(self):
         """Login on Tarallo"""
         body = dict()
@@ -46,7 +47,7 @@ class Tarallo(object):
         if self.request.status_code == 204:
             self.cookie = self.request.cookies
             return True
-        
+
         else:
             return False
 
@@ -62,23 +63,21 @@ class Tarallo(object):
     def add_item(self, item):
         # TODO: To be implemented
         pass
-    
+
     def logout(self):
         """Logout from TARALLO"""
-        if self.request.status_code==200: #check if you're authenticated  
-            headers = {"Content-Type": "application/json"}
-            self.request=requests.delete(self.url+'/v1/session', headers=headers,cookies=self.cookie)
-            if self.request.status_code==204:
-                self.cookie=None
-                return True
-            else:
-                return False
+        headers = {"Content-Type": "application/json"}
+        self.request = requests.delete(self.url + '/v1/session', headers=headers, cookies=self.cookie)
+        if self.request.status_code == 204:
+            self.cookie = None
+            return True
         else:
             return False
 
 
 class Item(object):
     """This class implements an ORM"""
+
     def __init__(self, data):
         """
         Items are generally created by the get_item staticmethod
@@ -97,8 +96,7 @@ class Item(object):
         """
         # TODO: To be implemented
         pass
- 
+
 
 def get_tsession():
     return tsession
-
