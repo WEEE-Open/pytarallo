@@ -51,8 +51,7 @@ class Tarallo(object):
         else:
             return False
 
-    @staticmethod
-    def get_item(code):
+    def get_item(self, code):
         """This method should return an Item instance"""
         # TODO: To be implemented
         # Grab stuff from tarallo and get the JSON
