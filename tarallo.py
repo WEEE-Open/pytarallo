@@ -2,6 +2,7 @@ import os
 import json
 import requests
 
+
 """
 This variable contains the Tarallo() instance for the working session.
 This is meant to be imported in the final script and allocated in there.
@@ -45,6 +46,7 @@ class Tarallo(object):
         if self.request.status_code == 204:
             self.cookie = self.request.cookies
             return True
+        
         else:
             return False
 
@@ -63,8 +65,16 @@ class Tarallo(object):
     
     def logout(self):
         """Logout from TARALLO"""
-        # TODO: To be implemented (same as login)
-        pass
+        if self.request.status_code==200: #check if you're authenticated  
+            headers = {"Content-Type": "application/json"}
+            self.request=requests.delete(self.url+'/v1/session', headers=headers,cookies=self.cookie)
+            if self.request.status_code==204:
+                self.cookie=None
+                return True
+            else:
+                return False
+        else:
+            return False
 
 
 class Item(object):
