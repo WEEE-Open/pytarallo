@@ -52,11 +52,20 @@ class Tarallo(object):
             return False
 
     def get_item(self, code):
-        """This method should return an Item instance"""
-        # TODO: To be implemented
-        # Grab stuff from tarallo and get the JSON
-        # item = Item(insert a dict() here)
-        # return item
+        """This method returns an Item instance"""
+        # TODO: Further implementation
+        # Find a way of transforming dictionary keys into Class attributes
+        self.request = requests.get(
+            self.url + '/v1/items/' + code, cookies=self.cookie)
+
+        if self.request.status_code == 200:
+            item = Item(json.loads(self.request.content)["data"])
+            return item
+
+        elif self.request.status_code == 404:
+            print("Item not found. Make sure the item code is valid")
+        else:
+            print("User not authenticated")
         pass
 
     def add_item(self, item):
