@@ -57,16 +57,12 @@ class Tarallo(object):
         # Find a way of transforming dictionary keys into Class attributes
         self.request = requests.get(
             self.url + '/v1/items/' + code, cookies=self.cookie)
-
+            
         if self.request.status_code == 200:
             item = Item(json.loads(self.request.content)["data"])
             return item
-
-        elif self.request.status_code == 404:
-            print("Item not found. Make sure the item code is valid")
         else:
-            print("User not authenticated")
-        pass
+            raise ValueError(self.request)
 
     def add_item(self, item):
         # TODO: To be implemented
@@ -88,13 +84,13 @@ class Item(object):
 
     def __init__(self, data):
         """
-        Items are generally created by the get_item staticmethod
+        Items are generally created by the get_item method
         But could be created somewhere else and then added to the
         database using the add_item method
         params: data: a dict() containing the json gathered from tarallo
         """
-        # TODO: To be implemented
-        pass
+        for k, v in data.items():
+            setattr(self, k, v)
 
     def move_to(self, location):
         """
