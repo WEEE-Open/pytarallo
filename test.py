@@ -82,10 +82,10 @@ def test_tarallo_request_after_invalid_login():
     assert tarallo_session.request is not None
 
 
-def test_tarallo_cookie():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    assert tarallo_session.cookie is None
-    tarallo_session.login()
-    assert tarallo_session.cookie is not None
-    tarallo_session.logout()
-    assert tarallo_session.cookie is None
+#def test_tarallo_cookie():
+#    tarallo_session = Tarallo(t_url, t_user, t_pass)
+#    assert tarallo_session.cookie is None
+#    tarallo_session.login()
+#    assert tarallo_session.cookie is not None
+#    tarallo_session.logout()
+#    assert tarallo_session.cookie is None
