@@ -23,18 +23,18 @@ def test_status_before_login():
     assert status is False
 
 
-def test_status_after_login():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
-    status = tarallo_session.status()
-    assert status is True
-
-
 def test_logout_before_login():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.logout()
     status = tarallo_session.status()
     assert status is False
+
+
+def test_status_after_login():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    status = tarallo_session.status()
+    assert status is True
 
 
 def test_login():
@@ -81,11 +81,3 @@ def test_tarallo_request_after_invalid_login():
     tarallo_session.login()
     assert tarallo_session.request is not None
 
-
-#def test_tarallo_cookie():
-#    tarallo_session = Tarallo(t_url, t_user, t_pass)
-#    assert tarallo_session.cookie is None
-#    tarallo_session.login()
-#    assert tarallo_session.cookie is not None
-#    tarallo_session.logout()
-#    assert tarallo_session.cookie is None

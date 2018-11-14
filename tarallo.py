@@ -16,8 +16,8 @@ class Tarallo(object):
         self.url = url
         self.user = user
         self.passwd = passwd
+        self.session = None
         self.request = None  # Last request
-        self.cookie = None
 
     def status(self):
         """
@@ -27,35 +27,41 @@ class Tarallo(object):
             True if session is valid
             False if session has expired or user is not authenticated
         """
-        if self.cookie is not None:
-            self.request = requests.get(self.url + '/v1/session', cookies=self.cookie)
+        if self.session is not None:
+            self.request = self.session.get(self.url + '/v1/session')
             if self.request.status_code == 200:
-                return True
-            if self.request.status_code != 403:
+                return True 
+            else:
                 return False
         else:
             return False
 
     def login(self):
-        """Login on Tarallo"""
+        """
+        Login on Tarallo
+        
+        :return:
+            True if successful login
+            False if authentication failed
+        """
         body = dict()
         body['username'] = self.user
         body['password'] = self.passwd
         headers = {"Content-Type": "application/json"}
-        self.request = requests.post(self.url + '/v1/session', data=json.dumps(body), headers=headers)
+        self.session = requests.Session()
+        self.request = self.session.post(self.url + '/v1/session', data=json.dumps(body), headers=headers)
 
         if self.request.status_code == 204:
-            self.cookie = self.request.cookies
             return True
-
         else:
+            self.session = None
             return False
 
     def get_item(self, code):
         """This method returns an Item instance"""
         # TODO: Further implementation
         # Find a way of transforming dictionary keys into Class attributes
-        self.request = requests.get(
+        self.request = self.session.get(
             self.url + '/v1/items/' + code, cookies=self.cookie)
             
         if self.request.status_code == 200:
@@ -69,11 +75,19 @@ class Tarallo(object):
         pass
 
     def logout(self):
-        """Logout from TARALLO"""
-        headers = {"Content-Type": "application/json"}
-        self.request = requests.delete(self.url + '/v1/session', headers=headers, cookies=self.cookie)
+        """
+        Logout from TARALLO
+        
+        :return:
+            True if successful logout
+            False if logout failed 
+        """
+        if not self.session:
+            return False
+
+        self.request = self.session.delete(self.url + '/v1/session')
         if self.request.status_code == 204:
-            self.cookie = None
+            self.session = None
             return True
         else:
             return False
@@ -104,3 +118,4 @@ class Item(object):
 
 def get_tsession():
     return tsession
+
