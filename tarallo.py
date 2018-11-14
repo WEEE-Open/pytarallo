@@ -59,14 +59,14 @@ class Tarallo(object):
 
     def get_item(self, code):
         """This method returns an Item instance"""
-        # TODO: Further implementation
-        # Find a way of transforming dictionary keys into Class attributes
         self.request = self.session.get(
-            self.url + '/v1/items/' + code, cookies=self.cookie)
-            
+            self.url + '/v1/items/' + code)
+
         if self.request.status_code == 200:
             item = Item(json.loads(self.request.content)["data"])
             return item
+        elif self.request.status_code == 404:
+            raise ValueError("404 - Request succeeded but item doesn't exist")
         else:
             raise ValueError(self.request)
 
