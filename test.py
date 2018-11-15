@@ -74,4 +74,3 @@ def test_failed_retry_login():
     tarallo_session.user = 'asd'
     assert tarallo_session.status() == 403
     tarallo_session.get_item('1')
-    tarallo_session.logout()
