@@ -14,7 +14,7 @@ class Tarallo(object):
     def login(self):
         """
         Login on Tarallo
-        
+
         :return:
             True if successful login
             False if authentication failed
@@ -42,7 +42,7 @@ class Tarallo(object):
             item = Item(json.loads(self.last_request.content)["data"])
             return item
         elif self.last_request.status_code == 404:
-            raise ValueError("404 - Request succeeded but item doesn't exist")
+            raise ItemNotFoundException("404 - Request succeeded but item "+str(code)+ " doesn't exist")
         else:
             raise ValueError(self.last_request)
 
@@ -71,10 +71,10 @@ class Tarallo(object):
     def logout(self):
         """
         Logout from TARALLO
-        
+
         :return:
             True if successful logout
-            False if logout failed 
+            False if logout failed
         """
         if self.last_request is None:
             return False
@@ -96,3 +96,14 @@ class Item(object):
         """
         for k, v in data.items():
             setattr(self, k, v)
+
+class ItemNotFoundException(Exception):
+    def __init__(self,code):
+        self.code=code
+
+
+class LocationNotFoundError(Exception):
+    pass
+
+class NotAuthorizedError(Exception):
+    pass
