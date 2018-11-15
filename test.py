@@ -81,3 +81,13 @@ def test_tarallo_request_after_invalid_login():
     tarallo_session.login()
     assert tarallo_session.request is not None
 
+
+def test_tarallo_get_item_95():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    item = tarallo_session.get_item('95')
+    assert item is not None
+    assert type(item) == tarallo.Item
+    assert item.code == '95'
+    tarallo_session.logout()
+
