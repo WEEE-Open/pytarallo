@@ -62,24 +62,24 @@ def test_tarallo_login_and_logut():
 
 def test_tarallo_request_after_status():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
-    assert tarallo_session.request is None
+    assert tarallo_session.last_request is None
     tarallo_session.login()
     tarallo_session.status()
-    assert tarallo_session.request is not None
+    assert tarallo_session.last_request is not None
 
 
 def test_tarallo_request_after_login():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
-    assert tarallo_session.request is None
+    assert tarallo_session.last_request is None
     tarallo_session.login()
-    assert tarallo_session.request is not None
+    assert tarallo_session.last_request is not None
 
 
 def test_tarallo_request_after_invalid_login():
     tarallo_session = Tarallo(t_url, 'invalid', 'invalid')
-    assert tarallo_session.request is None
+    assert tarallo_session.last_request is None
     tarallo_session.login()
-    assert tarallo_session.request is not None
+    assert tarallo_session.last_request is not None
 
 
 def test_tarallo_get_item_95():
@@ -90,4 +90,3 @@ def test_tarallo_get_item_95():
     assert type(item) == tarallo.Item
     assert item.code == '95'
     tarallo_session.logout()
-

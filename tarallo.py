@@ -1,4 +1,3 @@
-import os
 import json
 import requests
 
@@ -17,19 +16,19 @@ class Tarallo(object):
         self.user = user
         self.passwd = passwd
         self.session = None
-        self.request = None  # Last request
+        self.last_request = None
 
     def status(self):
         """
         Check the session status
-        
+
         :return:
             True if session is valid
             False if session has expired or user is not authenticated
         """
         if self.session is not None:
-            self.request = self.session.get(self.url + '/v1/session')
-            if self.request.status_code == 200:
+            self.last_request = self.session.get(self.url + '/v1/session')
+            if self.last_request.status_code == 200:
                 return True 
             else:
                 return False
@@ -49,9 +48,9 @@ class Tarallo(object):
         body['password'] = self.passwd
         headers = {"Content-Type": "application/json"}
         self.session = requests.Session()
-        self.request = self.session.post(self.url + '/v1/session', data=json.dumps(body), headers=headers)
+        self.last_request = self.session.post(self.url + '/v1/session', data=json.dumps(body), headers=headers)
 
-        if self.request.status_code == 204:
+        if self.last_request.status_code == 204:
             return True
         else:
             self.session = None
@@ -59,16 +58,16 @@ class Tarallo(object):
 
     def get_item(self, code):
         """This method returns an Item instance"""
-        self.request = self.session.get(
+        self.last_request = self.session.get(
             self.url + '/v1/items/' + code)
 
-        if self.request.status_code == 200:
-            item = Item(json.loads(self.request.content)["data"])
+        if self.last_request.status_code == 200:
+            item = Item(json.loads(self.last_request.content)["data"])
             return item
-        elif self.request.status_code == 404:
+        elif self.last_request.status_code == 404:
             raise ValueError("404 - Request succeeded but item doesn't exist")
         else:
-            raise ValueError(self.request)
+            raise ValueError(self.last_request)
 
     def add_item(self, item):
         # TODO: To be implemented
@@ -85,8 +84,8 @@ class Tarallo(object):
         if not self.session:
             return False
 
-        self.request = self.session.delete(self.url + '/v1/session')
-        if self.request.status_code == 204:
+        self.last_request = self.session.delete(self.url + '/v1/session')
+        if self.last_request.status_code == 204:
             self.session = None
             return True
         else:
@@ -118,4 +117,3 @@ class Item(object):
 
 def get_tsession():
     return tsession
-
