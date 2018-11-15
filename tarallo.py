@@ -1,39 +1,15 @@
 import json
 import requests
 
-"""
-This variable contains the Tarallo() instance for the working session.
-This is meant to be imported in the final script and allocated in there.
-"""
-tsession = None
-
 
 class Tarallo(object):
     """This class handles the Tarallo session"""
-
     def __init__(self, url, user, passwd):
         self.url = url
         self.user = user
         self.passwd = passwd
-        self.session = None
+        self.session = requests.Session()
         self.last_request = None
-
-    def status(self):
-        """
-        Check the session status
-
-        :return:
-            True if session is valid
-            False if session has expired or user is not authenticated
-        """
-        if self.session is not None:
-            self.last_request = self.session.get(self.url + '/v1/session')
-            if self.last_request.status_code == 200:
-                return True 
-            else:
-                return False
-        else:
-            return False
 
     def login(self):
         """
@@ -47,20 +23,21 @@ class Tarallo(object):
         body['username'] = self.user
         body['password'] = self.passwd
         headers = {"Content-Type": "application/json"}
-        self.session = requests.Session()
         self.last_request = self.session.post(self.url + '/v1/session', data=json.dumps(body), headers=headers)
 
         if self.last_request.status_code == 204:
             return True
         else:
-            self.session = None
             return False
+
+    def retry_login(self):
+        """This method retries to login if the session has expired"""
+        # TODO: To be implemented
+        pass
 
     def get_item(self, code):
         """This method returns an Item instance"""
-        self.last_request = self.session.get(
-            self.url + '/v1/items/' + code)
-
+        self.last_request = self.session.get(self.url + '/v1/items/' + code)
         if self.last_request.status_code == 200:
             item = Item(json.loads(self.last_request.content)["data"])
             return item
@@ -70,6 +47,24 @@ class Tarallo(object):
             raise ValueError(self.last_request)
 
     def add_item(self, item):
+        """Add an item to the database"""
+        # TODO: To be implemented
+        pass
+
+    def commit(self, item):
+        """Commit an updated Item to the database"""
+        # TODO: To be implemented
+        pass
+
+    def move(self, item, location):
+        """
+        Move an item to another location
+        """
+        # TODO: To be implemented
+        pass
+
+    def remove_item(self, item):
+        """Remove an item from the database"""
         # TODO: To be implemented
         pass
 
@@ -81,20 +76,17 @@ class Tarallo(object):
             True if successful logout
             False if logout failed 
         """
-        if not self.session:
+        if self.last_request is None:
             return False
-
         self.last_request = self.session.delete(self.url + '/v1/session')
         if self.last_request.status_code == 204:
-            self.session = None
             return True
         else:
             return False
 
 
 class Item(object):
-    """This class implements an ORM"""
-
+    """This class implements a pseudo-O(R)M"""
     def __init__(self, data):
         """
         Items are generally created by the get_item method
@@ -104,16 +96,3 @@ class Item(object):
         """
         for k, v in data.items():
             setattr(self, k, v)
-
-    def move_to(self, location):
-        """
-        Move an item to another location
-        Grab needed stuff from the tsession variable
-        and use the tsession for pushing edits
-        """
-        # TODO: To be implemented
-        pass
-
-
-def get_tsession():
-    return tsession
