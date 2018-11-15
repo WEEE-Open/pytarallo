@@ -104,8 +104,8 @@ class Item(object):
 
 
 class ItemNotFoundException(Exception):
-    def __init__(self,code):
-        self.code=code
+    def __init__(self, code):
+        self.code = code
 
 
 class LocationNotFoundError(Exception):
