@@ -30,10 +30,14 @@ class Tarallo(object):
         else:
             return False
 
+    def status(self):
+        """Returns the status_code of v1/session, useful for testing purposes"""
+        return self.session.get(self.url + '/v1/session').status_code
+
     def retry_login(self):
         """This method retries to login if the session has expired"""
-        # TODO: To be implemented
-        pass
+        if not self.login():
+            raise SessionError
 
     def get_item(self, code):
         """This method returns an Item instance"""
@@ -44,7 +48,8 @@ class Tarallo(object):
         elif self.last_request.status_code == 404:
             raise ItemNotFoundException("404 - Request succeeded but item "+str(code)+ " doesn't exist")
         else:
-            raise ValueError(self.last_request)
+            self.retry_login()
+            return self.get_item(code)
 
     def add_item(self, item):
         """Add an item to the database"""
@@ -97,6 +102,7 @@ class Item(object):
         for k, v in data.items():
             setattr(self, k, v)
 
+
 class ItemNotFoundException(Exception):
     def __init__(self,code):
         self.code=code
@@ -105,5 +111,10 @@ class ItemNotFoundException(Exception):
 class LocationNotFoundError(Exception):
     pass
 
+
 class NotAuthorizedError(Exception):
+    pass
+
+
+class SessionError(Exception):
     pass
