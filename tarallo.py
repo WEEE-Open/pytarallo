@@ -68,10 +68,14 @@ class Tarallo(object):
         # TODO: To be implemented
         pass
 
-    def remove_item(self, item):
+    def remove_item(self, code):
         """Remove an item from the database"""
-        # TODO: To be implemented
-        pass
+        self.request = self.session.delete(self.url + '/v1/items/' + code)
+        self.request = self.session.get(self.url + '/v1/items/' + code)
+        if self.request.status_code == 404:
+            return True
+        else:
+            return False
 
     def logout(self):
         """
