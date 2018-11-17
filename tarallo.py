@@ -146,6 +146,16 @@ class Tarallo(object):
             return True
         else:
             return False
+    
+    def restore_item(self, code):
+        """
+        Restore a deleted item
+
+        :return: True if item successfully restored
+                 False if failed to restore
+        """
+        # TODO: To be implemented
+        pass
 
     def logout(self):
         """
