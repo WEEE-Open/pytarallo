@@ -55,23 +55,23 @@ class Tarallo(object):
     # requests.Session() wrapper methods
     # These guys implement further checks and a re-login attempt
     # in case of bad response codes.
-    def get(self, url, once=False):
+    def get(self, url, once=False) -> requests.Response:
         self._do_request(self._session.get, url, once=once)
         return self.response
 
-    def delete(self, url):
+    def delete(self, url) -> requests.Response:
         self._do_request(self._session.delete, url)
         return self.response
 
-    def post(self, url, data, headers=None, once=False):
+    def post(self, url, data, headers=None, once=False) -> requests.Response:
         self._do_request_with_body(self._session.post, url, data=data, headers=headers, once=once)
         return self.response
 
-    def put(self, url, data, headers=None):
+    def put(self, url, data, headers=None) -> requests.Response:
         self._do_request_with_body(self._session.put, url, data=data, headers=headers)
         return self.response
 
-    def patch(self, url, data, headers=None):
+    def patch(self, url, data, headers=None) -> requests.Response:
         self._do_request_with_body(self._session.patch, url, data=data, headers=headers)
         return self.response
 
@@ -140,10 +140,14 @@ class Tarallo(object):
         :return: True if successful deletion
                  False if deletion failed
         """
-        self.delete(['/v1/items/', self.urlencode(code)])
-        self.get(['/v1/items/', self.urlencode(code), '?depth=0'])
-        if self.response.status_code == 404:
+        item_status = self.delete(['/v1/items/', self.urlencode(code)]).status_code
+        deleted_status = self.get(['/v1/deleted/', self.urlencode(code)]).status_code
+        if deleted_status == 200:
+            # Actually deleted
             return True
+        if item_status == 404 and deleted_status == 404:
+            # ...didn't even exist in the first place? Well, ok...
+            return None  # Tri-state FTW!
         else:
             return False
     

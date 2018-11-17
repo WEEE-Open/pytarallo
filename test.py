@@ -71,6 +71,16 @@ def test_remove_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
     assert tarallo_session.remove_item('R333') is True
+    # TODO: restore it
+    tarallo_session.logout()
+
+
+def test_remove_item_twice():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    assert tarallo_session.remove_item('R222') is True
+    assert tarallo_session.remove_item('R222') is True
+    # TODO: restore it
     tarallo_session.logout()
 
 
@@ -82,8 +92,8 @@ def test_remove_with_content():
     tarallo_session.logout()
 
 
-# def test_remove_invalid_item():
-#     tarallo_session = Tarallo(t_url, t_user, t_pass)
-#     tarallo_session.login()
-#     assert tarallo_session.remove_item('invalid') is False
-#     tarallo_session.logout()
+def test_remove_invalid_item():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    assert tarallo_session.remove_item('invalid') is None
+    tarallo_session.logout()
