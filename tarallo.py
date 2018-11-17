@@ -1,7 +1,7 @@
 import json
 import requests
 
-VALID_RESPONSES = [200, 204, 400, 404]
+VALID_RESPONSES = [200, 204, 400, 403, 404]
 
 
 class Tarallo(object):
@@ -13,38 +13,48 @@ class Tarallo(object):
         self.session = requests.Session()
         self.response = None
 
+    def _do_request(self, request_function, *args, **kwargs):
+        if 'once' in kwargs:
+            once = kwargs['once']
+            del kwargs['once']
+        else:
+            once = False
+
+        self.response = request_function(*args, **kwargs)
+        if self.response.status_code == 401:
+            if once:
+                raise SessionError
+            if not self.login():
+                raise SessionError
+            else:
+                self.response = request_function(*args, **kwargs)
+                if self.response.status_code not in VALID_RESPONSES:
+                    raise ServerError
+
+    def _do_request_with_body(self, request_function, *args, **kwargs):
+        if 'headers' not in kwargs or kwargs.get('headers') is None:
+            kwargs['headers'] = {}
+        if "Content-Type" not in kwargs['headers']:
+            kwargs['headers']["Content-Type"] = "application/json"
+        self._do_request(request_function, *args, **kwargs)
+
     # requests.Session() wrapper methods
     # These guys implement further checks and a re-login attempt
     # in case of bad response codes.
     def get(self, url):
-        self.response = self.session.get(url)
-        if self.response.status_code == 403:
-            if not self.login():
-                raise SessionError
-            else:
-                self.response = self.session.get(url)
-                if self.response.status_code not in VALID_RESPONSES:
-                    raise ServerError
-
-    def post(self, url, data, headers):
-        self.response = self.session.post(url, data=data, headers=headers)
-        if self.response.status_code == 403:
-            if not self.login():
-                raise SessionError
-            else:
-                self.response = self.session.post(url, data=data, headers=headers)
-                if self.response.status_code not in VALID_RESPONSES:
-                    raise ServerError
+        self._do_request(self.session.get, url)
 
     def delete(self, url):
-        self.response = self.session.delete(url)
-        if self.response.status_code == 403:
-            if not self.login():
-                raise SessionError
-            else:
-                self.response = self.session.delete(url)
-                if self.response.status_code not in VALID_RESPONSES:
-                    raise ServerError
+        self._do_request(self.session.delete, url)
+
+    def post(self, url, data, headers=None, once=False):
+        self._do_request_with_body(self.session.post, url, data=data, headers=headers, once=once)
+
+    def put(self, url, data, headers=None):
+        self._do_request_with_body(self.session.put, url, data=data, headers=headers)
+
+    def patch(self, url, data, headers=None):
+        self._do_request_with_body(self.session.patch, url, data=data, headers=headers)
 
     def login(self):
         """
@@ -57,8 +67,7 @@ class Tarallo(object):
         body = dict()
         body['username'] = self.user
         body['password'] = self.passwd
-        headers = {"Content-Type": "application/json"}
-        self.post(self.url + '/v1/session', json.dumps(body), headers)
+        self.post(self.url + '/v1/session', json.dumps(body), once=True)
         if self.response.status_code == 204:
             return True
         else:
@@ -102,7 +111,7 @@ class Tarallo(object):
                  False if deletion failed
         """
         self.delete(self.url + '/v1/items/' + code)
-        self.get(self.url + '/v1/items/' + code)
+        self.get(self.url + '/v1/items/' + code + '?depth=0')
         if self.response.status_code == 404:
             return True
         else:

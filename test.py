@@ -11,6 +11,7 @@ except KeyError:
     exit(1)
 
 
+@raises(tarallo.SessionError)
 def test_invalid_login():
     tarallo_session = Tarallo(t_url, 'invalid', 'invalid')
     assert tarallo_session.login() is False
@@ -53,7 +54,7 @@ def test_retry_login():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
     tarallo_session.logout()
-    assert tarallo_session.status() == 403
+    assert tarallo_session.status() == 401
     item = tarallo_session.get_item('1')
     assert item.code == '1'
     tarallo_session.logout()
@@ -61,7 +62,7 @@ def test_retry_login():
 
 def test_retry_login_without_previous_login():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
-    assert tarallo_session.status() == 403
+    assert tarallo_session.status() == 401
     assert tarallo_session.get_item('1').code == '1'
     tarallo_session.logout()
 
@@ -69,12 +70,20 @@ def test_retry_login_without_previous_login():
 def test_remove_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    assert tarallo_session.remove_item('1') is True
+    assert tarallo_session.remove_item('R333') is True
     tarallo_session.logout()
 
 
-def test_remove_invalid_item():
+def test_remove_with_content():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    assert tarallo_session.remove_item('asd') is False
+    # This fails because deleting items is like "rm", not "rm -r"
+    assert tarallo_session.remove_item('1') is False
     tarallo_session.logout()
+
+
+# def test_remove_invalid_item():
+#     tarallo_session = Tarallo(t_url, t_user, t_pass)
+#     tarallo_session.login()
+#     assert tarallo_session.remove_item('invalid') is False
+#     tarallo_session.logout()
