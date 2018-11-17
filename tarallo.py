@@ -181,7 +181,7 @@ class Item(object):
         Items are generally created by the get_item method
         But could be created somewhere else and then added to the
         database using the add_item method
-        params: data: a dict() containing the json gathered from tarallo
+        params: data: a dict() containing the item's data.
         """
         for k, v in data.items():
             setattr(self, k, v)
