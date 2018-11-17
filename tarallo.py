@@ -1,6 +1,8 @@
 import json
 import requests
 
+VALID_RESPONSES = [200, 204, 400, 404]
+
 
 class Tarallo(object):
     """This class handles the Tarallo session"""
@@ -9,7 +11,40 @@ class Tarallo(object):
         self.user = user
         self.passwd = passwd
         self.session = requests.Session()
-        self.last_request = None
+        self.response = None
+
+    # requests.Session() wrapper methods
+    # These guys implement further checks and a re-login attempt
+    # in case of bad response codes.
+    def get(self, url):
+        self.response = self.session.get(url)
+        if self.response.status_code == 403:
+            if not self.login():
+                raise SessionError
+            else:
+                self.response = self.session.get(url)
+                if self.response.status_code not in VALID_RESPONSES:
+                    raise ServerError
+
+    def post(self, url, data, headers):
+        self.response = self.session.post(url, data=data, headers=headers)
+        if self.response.status_code == 403:
+            if not self.login():
+                raise SessionError
+            else:
+                self.response = self.session.post(url, data=data, headers=headers)
+                if self.response.status_code not in VALID_RESPONSES:
+                    raise ServerError
+
+    def delete(self, url):
+        self.response = self.session.delete(url)
+        if self.response.status_code == 403:
+            if not self.login():
+                raise SessionError
+            else:
+                self.response = self.session.delete(url)
+                if self.response.status_code not in VALID_RESPONSES:
+                    raise ServerError
 
     def login(self):
         """
@@ -23,9 +58,8 @@ class Tarallo(object):
         body['username'] = self.user
         body['password'] = self.passwd
         headers = {"Content-Type": "application/json"}
-        self.last_request = self.session.post(self.url + '/v1/session', data=json.dumps(body), headers=headers)
-
-        if self.last_request.status_code == 204:
+        self.post(self.url + '/v1/session', json.dumps(body), headers)
+        if self.response.status_code == 204:
             return True
         else:
             return False
@@ -34,22 +68,14 @@ class Tarallo(object):
         """Returns the status_code of v1/session, useful for testing purposes"""
         return self.session.get(self.url + '/v1/session').status_code
 
-    def retry_login(self):
-        """This method retries to login if the session has expired"""
-        if not self.login():
-            raise SessionError
-
     def get_item(self, code):
         """This method returns an Item instance"""
-        self.last_request = self.session.get(self.url + '/v1/items/' + code)
-        if self.last_request.status_code == 200:
-            item = Item(json.loads(self.last_request.content)["data"])
+        self.get(self.url + '/v1/items/' + code)
+        if self.response.status_code == 200:
+            item = Item(json.loads(self.response.content)["data"])
             return item
-        elif self.last_request.status_code == 404:
-            raise ItemNotFoundException("404 - Request succeeded but item "+str(code)+ " doesn't exist")
-        else:
-            self.retry_login()
-            return self.get_item(code)
+        elif self.response.status_code == 404:
+            raise ItemNotFoundError("Item " + str(code) + " doesn't exist")
 
     def add_item(self, item):
         """Add an item to the database"""
@@ -69,10 +95,15 @@ class Tarallo(object):
         pass
 
     def remove_item(self, code):
-        """Remove an item from the database"""
-        self.request = self.session.delete(self.url + '/v1/items/' + code)
-        self.request = self.session.get(self.url + '/v1/items/' + code)
-        if self.request.status_code == 404:
+        """
+        Remove an item from the database
+
+        :return: True if successful deletion
+                 False if deletion failed
+        """
+        self.delete(self.url + '/v1/items/' + code)
+        self.get(self.url + '/v1/items/' + code)
+        if self.response.status_code == 404:
             return True
         else:
             return False
@@ -85,10 +116,10 @@ class Tarallo(object):
             True if successful logout
             False if logout failed
         """
-        if self.last_request is None:
+        if self.response is None:
             return False
-        self.last_request = self.session.delete(self.url + '/v1/session')
-        if self.last_request.status_code == 204:
+        self.delete(self.url + '/v1/session')
+        if self.response.status_code == 204:
             return True
         else:
             return False
@@ -107,7 +138,7 @@ class Item(object):
             setattr(self, k, v)
 
 
-class ItemNotFoundException(Exception):
+class ItemNotFoundError(Exception):
     def __init__(self, code):
         self.code = code
 
@@ -121,4 +152,8 @@ class NotAuthorizedError(Exception):
 
 
 class SessionError(Exception):
+    pass
+
+
+class ServerError(Exception):
     pass

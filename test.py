@@ -14,24 +14,24 @@ except KeyError:
 def test_invalid_login():
     tarallo_session = Tarallo(t_url, 'invalid', 'invalid')
     assert tarallo_session.login() is False
-    assert tarallo_session.last_request.status_code == 400
+    assert tarallo_session.response.status_code == 400
 
 
 def test_logout_before_login():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     assert tarallo_session.logout() is False
-    assert tarallo_session.last_request is None
+    assert tarallo_session.response is None
 
 
 def test_login_and_logout():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     assert tarallo_session.login() is True
-    assert tarallo_session.last_request.status_code == 204
+    assert tarallo_session.response.status_code == 204
     assert tarallo_session.logout() is True
-    assert tarallo_session.last_request.status_code == 204
+    assert tarallo_session.response.status_code == 204
 
 
-@raises(tarallo.ItemNotFoundException)
+@raises(tarallo.ItemNotFoundError)
 def test_get_invalid_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
@@ -62,15 +62,19 @@ def test_retry_login():
 def test_retry_login_without_previous_login():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     assert tarallo_session.status() == 403
-    assert tarallo_session.get_item('95').code == '95'
+    assert tarallo_session.get_item('1').code == '1'
     tarallo_session.logout()
 
 
-@raises(tarallo.SessionError)
-def test_failed_retry_login():
+def test_remove_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
+    assert tarallo_session.remove_item('1') is True
     tarallo_session.logout()
-    tarallo_session.user = 'asd'
-    assert tarallo_session.status() == 403
-    tarallo_session.get_item('1')
+
+
+def test_remove_invalid_item():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    assert tarallo_session.remove_item('asd') is False
+    tarallo_session.logout()
