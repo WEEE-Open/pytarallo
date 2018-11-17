@@ -54,7 +54,7 @@ def test_retry_login():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
     tarallo_session.logout()
-    assert tarallo_session.status() == 401
+    assert tarallo_session.status(False) == 401
     item = tarallo_session.get_item('1')
     assert item.code == '1'
     tarallo_session.logout()
@@ -62,7 +62,7 @@ def test_retry_login():
 
 def test_retry_login_without_previous_login():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
-    assert tarallo_session.status() == 401
+    assert tarallo_session.status(False) == 401
     assert tarallo_session.get_item('1').code == '1'
     tarallo_session.logout()
 
