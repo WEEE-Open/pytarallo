@@ -121,8 +121,8 @@ class Tarallo(object):
         # TODO: To be implemented
         pass
 
-    def commit(self, item):
-        """Commit an updated Item to the database"""
+    def update_features(self, item):
+        """Send updated features to the database (this is the PATCH endpoint)"""
         # TODO: To be implemented
         pass
 
