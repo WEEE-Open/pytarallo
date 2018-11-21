@@ -27,9 +27,8 @@ class Tarallo(object):
         else:
             url_components = args[0]
 
-        final_url = self.url
-        for piece in url_components:
-            final_url = urllib.parse.urljoin(final_url, piece)
+        # Best library to join url components: this thing.
+        final_url = '/'.join(s.strip('/') for s in [self.url] + url_components)
 
         args = tuple([final_url]) + args[1:]
 
