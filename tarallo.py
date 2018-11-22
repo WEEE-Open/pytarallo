@@ -2,7 +2,7 @@ import json
 import urllib.parse
 import requests
 
-VALID_RESPONSES = [200, 204, 400, 403, 404]
+VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
 
 class Tarallo(object):
@@ -150,16 +150,19 @@ class Tarallo(object):
         else:
             return False
     
-    def restore_item(self, code):
+    def restore_item(self, code, location):
         """
-        Restore a deleted item
+        Restores a deleted item
 
         :return: True if item successfully restored
                  False if failed to restore
         """
-        # TODO: To be implemented
-        pass
-
+        item_status = self.put(['/v1/deleted/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
+        if item_status == 201:
+            return True
+        else:
+            return False
+        
     def logout(self):
         """
         Logout from TARALLO
