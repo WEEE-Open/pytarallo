@@ -70,7 +70,7 @@ def test_retry_login_without_previous_login():
 def test_remove_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    assert tarallo_session.remove_item('R333') is True
+    assert tarallo_session.remove_item('R222') is True
     tarallo_session.restore_item('R222', 'B115')
     tarallo_session.logout()
 
@@ -97,6 +97,7 @@ def test_remove_invalid_item():
     tarallo_session.login()
     assert tarallo_session.remove_item('invalid') is None
     tarallo_session.logout()
+
 
 def test_restore_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
