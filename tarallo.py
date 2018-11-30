@@ -129,8 +129,16 @@ class Tarallo(object):
         """
         Move an item to another location
         """
-        # TODO: To be implemented
-        pass
+        code = getattr(item, 'code')
+        move_status = t.put(f"https://tarallo.weeeopen.it/v1/items/{code}/parent",
+                            headers={"Content-Type": "application/json"},
+                            data=location)
+        print(f"Moving {code}: {str(move_status.status_code)}")
+        # check status  Errors,exceptions ??
+        '''if move_status == 200:
+            return True
+        else:
+            return False'''
 
     def remove_item(self, code):
         """
