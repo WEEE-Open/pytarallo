@@ -125,20 +125,15 @@ class Tarallo(object):
         # TODO: To be implemented
         pass
 
-    def move(self, item, location):
+    def move(self, code, location):
         """
         Move an item to another location
         """
-        code = getattr(item, 'code')
-        move_status = t.put(f"https://tarallo.weeeopen.it/v1/items/{code}/parent",
-                            headers={"Content-Type": "application/json"},
-                            data=location)
-        print(f"Moving {code}: {str(move_status.status_code)}")
-        # check status  Errors,exceptions ??
-        '''if move_status == 200:
+        move_status = self.put(['v1/items/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
+        if move_status == 204 or move_status == 201:
             return True
         else:
-            return False'''
+            return False
 
     def remove_item(self, code):
         """
