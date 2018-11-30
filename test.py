@@ -78,9 +78,9 @@ def test_remove_item():
 def test_remove_item_twice():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    assert tarallo_session.remove_item('R222') is True
-    assert tarallo_session.remove_item('R222') is True
-    tarallo_session.restore_item('R222', 'B115')
+    assert tarallo_session.remove_item('R223') is True
+    assert tarallo_session.remove_item('R223') is True
+    tarallo_session.restore_item('R223', 'B115')
     tarallo_session.logout()
 
 
@@ -102,6 +102,29 @@ def test_remove_invalid_item():
 def test_restore_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    tarallo_session.remove_item('R222')
-    assert tarallo_session.restore_item('R222', 'B115') is True
+    tarallo_session.remove_item('R242')
+    assert tarallo_session.restore_item('R242', 'B115') is True
+    tarallo_session.logout()
+
+
+def test_move_item():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    assert tarallo_session.move("R111", "B30") is True
+    tarallo_session.logout()
+
+
+def test_move_item_invalid():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    assert tarallo_session.move("INVALID", "B103") is False
+    assert tarallo_session.move("R200", "INVALID") is False
+    tarallo_session.logout()
+
+
+def test_move_item_impossible():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    # Invalid nesting, cannot place a RAM inside a CPU
+    assert tarallo_session.move("R200", "C106") is False
     tarallo_session.logout()
