@@ -125,12 +125,15 @@ class Tarallo(object):
         # TODO: To be implemented
         pass
 
-    def move(self, item, location):
+    def move(self, code, location):
         """
         Move an item to another location
         """
-        # TODO: To be implemented
-        pass
+        move_status = self.put(['v1/items/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
+        if move_status == 204 or move_status == 201:
+            return True
+        else:
+            return False
 
     def remove_item(self, code):
         """
