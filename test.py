@@ -11,11 +11,13 @@ except KeyError:
     exit(1)
 
 
-@raises(tarallo.SessionError)
+@raises(tarallo.AuthenticationError)
 def test_invalid_login():
     tarallo_session = Tarallo(t_url, 'invalid', 'invalid')
-    assert tarallo_session.login() is False
-    assert tarallo_session.response.status_code == 400
+    tarallo_session.login()
+    # Once an exception is raised, the test terminates...
+    # Any assert after that is simply ignored, place a breakpoint there if you don't believe me...
+    # assert tarallo_session.response.status_code == 400
 
 
 def test_logout_before_login():
@@ -47,6 +49,8 @@ def test_get_item():
     assert item is not None
     assert type(item) == tarallo.Item
     assert item.code == '1'
+    assert isinstance(item.features, dict)
+    assert item.features["type"] == "case"
     tarallo_session.logout()
 
 
