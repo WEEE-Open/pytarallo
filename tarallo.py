@@ -35,9 +35,9 @@ class Tarallo(object):
         self.response = request_function(*args, **kwargs)
         if self.response.status_code == 401:
             if once:
-                raise SessionError
+                raise AuthenticationError
             if not self.login():
-                raise SessionError
+                raise AuthenticationError
             # Retry, discarding previous response
             self.response = request_function(*args, **kwargs)
 
@@ -103,7 +103,7 @@ class Tarallo(object):
         """
         try:
             return self.get('/v1/session', once=not retry).status_code
-        except SessionError:
+        except AuthenticationError:
             return self.response.status_code
 
     def get_item(self, code):
@@ -202,16 +202,44 @@ class ItemNotFoundError(Exception):
 
 
 class LocationNotFoundError(Exception):
+    """
+    When a location where you want to place something... doesn't exists
+
+    E.g. in a move operation, when creating a new item, etc...
+    """
     pass
 
 
 class NotAuthorizedError(Exception):
+    """
+    When you authenticated successfully, but you're still not authorized to perform some operation
+
+    E.g. creating new users if you aren't an admin, modifying stuff with a read-only account, etc...
+    """
     pass
 
 
-class SessionError(Exception):
+class AuthenticationError(Exception):
+    """
+    When you authentication (login attempt) fails.
+
+    E.g. wrong password, nonexistent account, account disabled, etc...
+    """
+    pass
+
+
+class ValidationError(Exception):
+    """
+    When the server thinks your actions don't make any sense in real life and rejects them.
+
+    E.g. placing a RAM into a CPU, making a computer a "root item" (only locations can be),
+    placing items with mismatched sockets or connectors into each other, etc...
+    """
     pass
 
 
 class ServerError(Exception):
+    """
+    When the server returns a 500 status.
+    """
     pass
