@@ -132,3 +132,56 @@ def test_move_item_impossible():
     # Invalid nesting, cannot place a RAM inside a CPU
     assert tarallo_session.move("R200", "C106") is False
     tarallo_session.logout()
+
+
+def test_add_item():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    ram = Item()
+    ram.features["type"] = "ram"
+    ram.features["color"] = "red"
+    ram.features["capacity"] = 1024*1024*512  # 512 MiB
+    ram.location = "LabFis4"
+
+    assert tarallo_session.add_item(ram) is True
+
+    # set the code to the one received from the server
+    assert ram.code is not None
+    assert isinstance(ram.code, str)
+
+    # Let's get it again and check...
+    cpu = tarallo_session.get_item(ram.code)
+    assert cpu.path[-1:] == "LabFis4"
+    assert cpu.location == "LabFis4"
+    assert ram.features["type"] == "ram"
+    assert ram.features["color"] == "red"
+    assert ram.features["capacity"] == 1024 * 1024 * 512
+
+
+def test_add_item_cloned():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    cpu = tarallo_session.get_item("C123")
+    assert cpu is not None
+    # it comes from a computer, path will still contain that, I don't care: I want it in LabFis4.
+    # Send this location to the server, not the path.
+    cpu.location = "LabFis4"
+    # Let the server generate another code (since there's no way to delete items permanently we
+    # can't test manually assigned codes... or rather we can, but just once)
+    cpu.code = None
+    assert tarallo_session.add_item(cpu) is True
+    assert cpu.code is not None
+    assert not cpu.code == "C123"
+
+    # Let's get it again and check...
+    cpu = tarallo_session.get_item(cpu.code)
+    assert cpu.path[-1:] == "LabFis4"
+    assert cpu.location == "LabFis4"
+
+    # This may seem redundant, but these are different feature types...
+    assert cpu.features["brand"] == "Intel"
+    assert cpu.features["type"] == "cpu"
+    assert cpu.features["cpu-socket"] == "socket478"
+    assert cpu.features["frequency"] == 3060000000
+
+    tarallo_session.logout()

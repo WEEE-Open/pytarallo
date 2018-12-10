@@ -1,5 +1,7 @@
 import json
 import urllib.parse
+from typing import Optional, Dict, Any, List
+
 import requests
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
@@ -185,15 +187,33 @@ class Tarallo(object):
 
 class Item(object):
     """This class implements a pseudo-O(R)M"""
-    def __init__(self, data):
+    code: Optional[str]
+    features: Dict[str, Any]
+    contents: List[Any] # Other Item objects, actually
+    location: Optional[str]
+    path: List[str]
+
+    def __init__(self, data=None):
         """
         Items are generally created by the get_item method
         But could be created somewhere else and then added to the
         database using the add_item method
         params: data: a dict() containing the item's data.
         """
-        for k, v in data.items():
-            setattr(self, k, v)
+        self.code = None
+        self.features = {}
+        self.contents = list()
+        self.location = None
+        self.path = []
+
+        if data is not None:
+            for k, v in data.items():
+                setattr(self, k, v)
+            self.path = self.location
+            if len(self.path) >= 1:
+                self.location = self.path[-1:]
+            else:
+                self.location = None
 
 
 class ItemNotFoundError(Exception):
