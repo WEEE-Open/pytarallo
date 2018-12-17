@@ -119,8 +119,19 @@ class Tarallo(object):
 
     def add_item(self, item):
         """Add an item to the database"""
-        # TODO: To be implemented
-        pass
+        if item.code is not None:  #check whether an item's code was manually added 
+	    self.put(['/v1/items/CODE'])
+	    added_item_status = self.response.status_code
+	else:
+	    self.post(['/v1/items/'])
+	    added_item_status = self.response.status_code
+
+	if added_item_status == 201 :
+	    return True
+	elif added_item_status == 400 or added_item_status == 404:
+	    raise ValidationError
+	elif added_item_status == 403:
+	    raise NotAuthorizedError   
 
     def update_features(self, item):
         """Send updated features to the database (this is the PATCH endpoint)"""
