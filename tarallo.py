@@ -9,6 +9,7 @@ VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
 class Tarallo(object):
     """This class handles the Tarallo session"""
+
     def __init__(self, url, user, passwd):
         self.url = url
         self.user = user
@@ -119,19 +120,19 @@ class Tarallo(object):
 
     def add_item(self, item):
         """Add an item to the database"""
-        if item.code is not None:  #check whether an item's code was manually added 
-	    self.put(['/v1/items/CODE'])
-	    added_item_status = self.response.status_code
-	else:
-	    self.post(['/v1/items/'])
-	    added_item_status = self.response.status_code
+        if item.code is not None:  # check whether an item's code was manually added
+            self.put([f'/v1/items/{item.code}'], json.dumps(item))
+            added_item_status = self.response.status_code
+        else:
+            self.post(['/v1/items/'], json.dumps(item))
+            added_item_status = self.response.status_code
 
-	if added_item_status == 201 :
-	    return True
-	elif added_item_status == 400 or added_item_status == 404:
-	    raise ValidationError
-	elif added_item_status == 403:
-	    raise NotAuthorizedError   
+        if added_item_status == 201:
+            return True
+        elif added_item_status == 400 or added_item_status == 404:
+            raise ValidationError
+        elif added_item_status == 403:
+            raise NotAuthorizedError
 
     def update_features(self, item):
         """Send updated features to the database (this is the PATCH endpoint)"""
@@ -165,7 +166,7 @@ class Tarallo(object):
             return None  # Tri-state FTW!
         else:
             return False
-    
+
     def restore_item(self, code, location):
         """
         Restores a deleted item
@@ -178,7 +179,7 @@ class Tarallo(object):
             return True
         else:
             return False
-        
+
     def logout(self):
         """
         Logout from TARALLO
@@ -200,7 +201,7 @@ class Item(object):
     """This class implements a pseudo-O(R)M"""
     code: Optional[str]
     features: Dict[str, Any]
-    contents: List[Any] # Other Item objects, actually
+    contents: List[Any]  # Other Item objects, actually
     location: Optional[str]
     path: List[str]
 
