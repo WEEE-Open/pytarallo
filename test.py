@@ -134,6 +134,57 @@ def test_move_item_impossible():
     tarallo_session.logout()
 
 
+def test_update_one_feature():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    freq = tarallo_session.get_item('R46').features['frequency-hertz']
+
+    if freq % 2 == 0:
+        new_freq = freq + 1
+    else:
+        new_freq = freq - 1
+    # If operation succeeds, return True
+    assert tarallo_session.update_features('R46', {'frequency-hertz': new_freq})
+    freq_updated = tarallo_session.get_item('R46').features['frequency-hertz']
+    assert freq_updated == new_freq
+
+    assert tarallo_session.move("R200", "C106") is False
+    tarallo_session.logout()
+
+
+def test_delete_one_feature():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    # Insert a frequency
+    assert tarallo_session.update_features('R44', {'frequency-hertz': 266000000})
+
+    # Remove it
+    assert tarallo_session.update_features('R44', {'frequency-hertz': None})
+
+    # Check that it's gone
+    assert 'frequency-hertz' not in tarallo_session.get_item('R44').features
+
+    # Add it again
+    assert tarallo_session.update_features('R44', {'frequency-hertz': 266000000})
+    tarallo_session.logout()
+
+
+@raises(tarallo.ValidationError)
+def test_impossible_update():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    # Probably returns 400
+    tarallo_session.update_features('R43', {'frequency-hertz': -1})
+
+
+@raises(tarallo.ItemNotFoundError)
+def test_update_item_not_found():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    # Probably returns 404
+    tarallo_session.update_features('NONEXISTANT', {'color': 'red'})
+
+
 def test_add_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
