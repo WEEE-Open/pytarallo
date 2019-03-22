@@ -174,7 +174,7 @@ def test_impossible_update():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
     # Probably returns 400
-    tarallo_session.update_features('R43', {'frequency-hertz': -1})
+    tarallo_session.update_features('R43', {'color': 'impossible'})
 
 
 @raises(tarallo.ItemNotFoundError)
