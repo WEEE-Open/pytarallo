@@ -134,10 +134,17 @@ class Tarallo(object):
         elif added_item_status == 403:
             raise NotAuthorizedError
 
-    def update_features(self, item):
+    def update_features(self, code: str, features: dict):
         """Send updated features to the database (this is the PATCH endpoint)"""
-        # TODO: To be implemented
-        pass
+        self.patch(['/v1/items/', self.urlencode(code), '/features'], json.dumps(features))
+        status = self.response.status_code
+        if status == 200 or status == 204:
+            return True
+        elif status == 400:
+            raise ValidationError("Impossible to update feature/s")
+        elif status == 404:
+            # TODO: @quel_tale: get 404 instead of 500 (Internal Server Error)
+            raise ItemNotFoundError("Item " + str(code) + " doesn't exist")
 
     def move(self, code, location):
         """
