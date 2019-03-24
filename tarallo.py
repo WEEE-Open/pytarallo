@@ -136,13 +136,12 @@ class Tarallo(object):
 
     def update_features(self, code: str, features: dict):
         """Send updated features to the database (this is the PATCH endpoint)"""
-        self.patch(['/v1/items/', self.urlencode(code), '/features'], json.dumps(features))
-        status = self.response.status_code
-        if status == 200 or status == 204:
+        update_feature_status = self.patch(['/v1/items/', self.urlencode(code), '/features'], json.dumps(features)).status_code
+        if update_feature_status == 200 or update_feature_status == 204:
             return True
-        elif status == 400:
+        elif update_feature_status == 400:
             raise ValidationError("Impossible to update feature/s")
-        elif status == 404:
+        elif update_feature_status == 404:
             # TODO: @quel_tale: get 404 instead of 500 (Internal Server Error)
             raise ItemNotFoundError("Item " + str(code) + " doesn't exist")
 
