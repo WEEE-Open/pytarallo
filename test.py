@@ -210,7 +210,7 @@ def test_add_item():
     ram = Item()
     ram.features["type"] = "ram"
     ram.features["color"] = "red"
-    ram.features["capacity"] = 1024*1024*512  # 512 MiB
+    ram.features["capacity-byte"] = 1024 * 1024 * 1024 * 512  # 512 MiB
     ram.location = "LabFis4"
 
     assert tarallo_session.add_item(ram) is True
@@ -220,12 +220,12 @@ def test_add_item():
     assert isinstance(ram.code, str)
 
     # Let's get it again and check...
-    cpu = tarallo_session.get_item(ram.code)
-    assert cpu.path[-1:] == "LabFis4"
-    assert cpu.location == "LabFis4"
+    ram = tarallo_session.get_item(ram.code)
+    assert ram.path[-1:] == "LabFis4"
+    assert ram.location == "LabFis4"
     assert ram.features["type"] == "ram"
     assert ram.features["color"] == "red"
-    assert ram.features["capacity"] == 1024 * 1024 * 512
+    assert ram.features["capacity-byte"] == 1024 * 1024 * 1024 * 512
 
 
 def test_add_item_cloned():
@@ -239,11 +239,18 @@ def test_add_item_cloned():
     # Let the server generate another code (since there's no way to delete items permanently we
     # can't test manually assigned codes... or rather we can, but just once)
     cpu.code = None
+    # Add it: should succeed
     assert tarallo_session.add_item(cpu) is True
+
+    # This stuff should be updated
     assert cpu.code is not None
     assert not cpu.code == "C123"
+    # Just set path to none after inserting an item. The server doesn't return the full path so you have no way to
+    # assign the correct value to this variable.
+    # This assert checks just that:
+    assert cpu.path is None
 
-    # Let's get it again and check...
+    # Let's get the entire item again and check...
     cpu = tarallo_session.get_item(cpu.code)
     assert cpu.path[-1:] == "LabFis4"
     assert cpu.location == "LabFis4"
