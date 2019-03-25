@@ -210,7 +210,7 @@ def test_add_item():
     ram = Item()
     ram.features["type"] = "ram"
     ram.features["color"] = "red"
-    ram.features["capacity-byte"] = 1024 * 1024 * 1024 * 512  # 512 MiB
+    ram.features["capacity-byte"] = 1024 * 1024 * 512  # 512 MiB
     ram.location = "LabFis4"
 
     assert tarallo_session.add_item(ram) is True
@@ -225,7 +225,7 @@ def test_add_item():
     assert ram.location == "LabFis4"
     assert ram.features["type"] == "ram"
     assert ram.features["color"] == "red"
-    assert ram.features["capacity-byte"] == 1024 * 1024 * 1024 * 512
+    assert ram.features["capacity-byte"] == 1024 * 1024 * 512
 
 
 def test_add_item_cloned():
