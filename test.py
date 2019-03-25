@@ -173,16 +173,35 @@ def test_delete_one_feature():
 def test_impossible_update():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    # Probably returns 400
     tarallo_session.update_features('R43', {'color': 'impossible'})
+
+
+@raises(tarallo.ValidationError)
+def test_impossible_update_no_such_feature():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    tarallo_session.update_features('R43', {'nonexistent': 'foo'})
+
+
+@raises(tarallo.ValidationError)
+def test_empty_update():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    tarallo_session.update_features('R43', {})
 
 
 @raises(tarallo.ItemNotFoundError)
 def test_update_item_not_found():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    # Probably returns 404
-    tarallo_session.update_features('NONEXISTANT', {'color': 'red'})
+    tarallo_session.update_features('NONEXISTENT', {'color': 'red'})
+
+
+@raises(tarallo.ItemNotFoundError)
+def test_update_item_not_found_2():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    tarallo_session.update_features('NONEXISTANT', {'color': None})
 
 
 def test_add_item():

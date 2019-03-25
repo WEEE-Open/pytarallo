@@ -74,6 +74,7 @@ class Tarallo(object):
         return self.response
 
     def patch(self, url, data, headers=None) -> requests.Response:
+        # , cookies={"XDEBUG_SESSION": "PHPSTORM"}
         self._do_request_with_body(self._session.patch, url, data=data, headers=headers)
         return self.response
 
@@ -134,10 +135,17 @@ class Tarallo(object):
         elif added_item_status == 403:
             raise NotAuthorizedError
 
-    def update_features(self, item):
-        """Send updated features to the database (this is the PATCH endpoint)"""
-        # TODO: To be implemented
-        pass
+    def update_features(self, code: str, features: dict):
+        """
+        Send updated features to the database (this is the PATCH endpoint)
+        """
+        self.patch(['/v1/items/', self.urlencode(code), '/features'], json.dumps(features))
+        if self.response.status_code == 200 or self.response.status_code == 204:
+            return True
+        elif self.response.status_code == 400:
+            raise ValidationError("Impossible to update feature/s")
+        elif self.response.status_code == 404:
+            raise ItemNotFoundError("Item " + str(code) + " doesn't exist")
 
     def move(self, code, location):
         """
