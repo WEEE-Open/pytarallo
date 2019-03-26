@@ -221,8 +221,8 @@ def test_add_item():
 
     # Let's get it again and check...
     ram = tarallo_session.get_item(ram.code)
-    assert ram.path[-1:] == "LabFis4"
-    assert ram.location == "LabFis4"
+    assert ram.path[-1:] == ['LabFis4']
+    assert ram.location == ['LabFis4']
     assert ram.features["type"] == "ram"
     assert ram.features["color"] == "red"
     assert ram.features["capacity-byte"] == 1024 * 1024 * 512
@@ -252,13 +252,13 @@ def test_add_item_cloned():
 
     # Let's get the entire item again and check...
     cpu = tarallo_session.get_item(cpu.code)
-    assert cpu.path[-1:] == "LabFis4"
-    assert cpu.location == "LabFis4"
+    assert cpu.path[-1:] == ['LabFis4']
+    assert cpu.location == ['LabFis4']
 
     # This may seem redundant, but these are different feature types...
     assert cpu.features["brand"] == "Intel"
     assert cpu.features["type"] == "cpu"
     assert cpu.features["cpu-socket"] == "socket478"
-    assert cpu.features["frequency"] == 3060000000
+    assert cpu.features["frequency-hertz"] == 3060000000
 
     tarallo_session.logout()
