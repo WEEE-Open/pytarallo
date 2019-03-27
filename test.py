@@ -286,3 +286,9 @@ def test_travaso():
 
     tarallo_session.move("A2", "1")
     tarallo_session.move("B1", "1")
+
+@raises(tarallo.ItemNotFoundError)
+def test_travaso_invalid_item():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    test_item = tarallo_session.travaso("bigasd", "LabFis4")
