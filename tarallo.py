@@ -43,7 +43,6 @@ class Tarallo(object):
                 raise AuthenticationError
             # Retry, discarding previous response
             self.response = request_function(*args, **kwargs)
-
         if self.response.status_code not in VALID_RESPONSES:
             raise ServerError
 
@@ -198,6 +197,18 @@ class Tarallo(object):
             return True
         else:
             return False
+
+    def travaso(self, code, location):
+        item = self.get_item(code)
+        codes = []
+        for inner in item.contents:
+            codes.append(inner.get('code'))
+        for inner_code in codes:
+            result_move = self.move(inner_code, location)
+            if result_move is False:
+                # Should probably change to more appropriate custom error
+                raise ItemNotFoundError(inner_code)
+        return True
 
     def logout(self):
         """

@@ -262,3 +262,27 @@ def test_add_item_cloned():
     assert cpu.features["frequency-hertz"] == 3060000000
 
     tarallo_session.logout()
+
+
+def test_travaso():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    test_item = tarallo_session.travaso("1", "LabFis4")
+    assert test_item is True
+
+    item_A2 = tarallo_session.get_item("A2")
+    assert item_A2 is not None
+    assert type(item_A2) == tarallo.Item
+    assert item_A2.code == 'A2'
+    assert isinstance(item_A2.features, dict)
+    assert item_A2.location == ['LabFis4']
+
+    item_B1 = tarallo_session.get_item("B1")
+    assert item_B1 is not None
+    assert type(item_B1) == tarallo.Item
+    assert item_B1.code == 'B1'
+    assert isinstance(item_B1.features, dict)
+    assert item_B1.location == ['LabFis4']
+
+    tarallo_session.move("A2", "1")
+    tarallo_session.move("B1", "1")
