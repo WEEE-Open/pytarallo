@@ -43,7 +43,6 @@ class Tarallo(object):
                 raise AuthenticationError
             # Retry, discarding previous response
             self.response = request_function(*args, **kwargs)
-
         if self.response.status_code not in VALID_RESPONSES:
             raise ServerError
 
@@ -70,12 +69,14 @@ class Tarallo(object):
         return self.response
 
     def put(self, url, data, headers=None) -> requests.Response:
-        self._do_request_with_body(self._session.put, url, data=data, headers=headers)
+        self._do_request_with_body(
+            self._session.put, url, data=data, headers=headers)
         return self.response
 
     def patch(self, url, data, headers=None) -> requests.Response:
         # , cookies={"XDEBUG_SESSION": "PHPSTORM"}
-        self._do_request_with_body(self._session.patch, url, data=data, headers=headers)
+        self._do_request_with_body(
+            self._session.patch, url, data=data, headers=headers)
         return self.response
 
     @staticmethod
@@ -122,16 +123,16 @@ class Tarallo(object):
     def add_item(self, item):
         """Add an item to the database"""
         if item.code is not None:  # check whether an item's code was manually added
-            self.put([f'/v1/items/{item.code}'], data=json.dumps(item.serializable()))
+            self.put([f'/v1/items/{item.code}'],
+                     data=json.dumps(item.serializable()))
             added_item_status = self.response.status_code
         else:
             self.post(['/v1/items/'], data=json.dumps(item.serializable()))
             added_item_status = self.response.status_code
 
         if added_item_status == 201:
-            # TODO: set the code to the one received from the server
-            # "assert ram.code is not None" in test_add_item fails, but the rest of the test should pass
-            # TODO: set path to None (see comments in test.py)
+            item.code = json.loads(self.response.content)["data"]
+            item.path = None
             return True
         elif added_item_status == 400 or added_item_status == 404:
             raise ValidationError
@@ -142,7 +143,8 @@ class Tarallo(object):
         """
         Send updated features to the database (this is the PATCH endpoint)
         """
-        self.patch(['/v1/items/', self.urlencode(code), '/features'], json.dumps(features))
+        self.patch(['/v1/items/', self.urlencode(code),
+                    '/features'], json.dumps(features))
         if self.response.status_code == 200 or self.response.status_code == 204:
             return True
         elif self.response.status_code == 400:
@@ -154,7 +156,8 @@ class Tarallo(object):
         """
         Move an item to another location
         """
-        move_status = self.put(['v1/items/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
+        move_status = self.put(
+            ['v1/items/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
         if move_status == 204 or move_status == 201:
             return True
         else:
@@ -167,8 +170,10 @@ class Tarallo(object):
         :return: True if successful deletion
                  False if deletion failed
         """
-        item_status = self.delete(['/v1/items/', self.urlencode(code)]).status_code
-        deleted_status = self.get(['/v1/deleted/', self.urlencode(code)]).status_code
+        item_status = self.delete(
+            ['/v1/items/', self.urlencode(code)]).status_code
+        deleted_status = self.get(
+            ['/v1/deleted/', self.urlencode(code)]).status_code
         if deleted_status == 200:
             # Actually deleted
             return True
@@ -185,11 +190,24 @@ class Tarallo(object):
         :return: True if item successfully restored
                  False if failed to restore
         """
-        item_status = self.put(['/v1/deleted/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
+        item_status = self.put(
+            ['/v1/deleted/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
         if item_status == 201:
             return True
         else:
             return False
+
+    def travaso(self, code, location):
+        item = self.get_item(code)
+        codes = []
+        for inner in item.contents:
+            codes.append(inner.get('code'))
+        for inner_code in codes:
+            result_move = self.move(inner_code, location)
+            if result_move is False:
+                # Should probably change to more appropriate custom error
+                raise ItemNotFoundError(inner_code)
+        return True
 
     def logout(self):
         """
