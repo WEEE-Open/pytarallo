@@ -65,8 +65,7 @@ class Tarallo(object):
         return self.response
 
     def post(self, url, data, headers=None, once=False) -> requests.Response:
-        self._do_request_with_body(self._session.post, url, data=data,
-                                   headers=headers, once=once, cookies={"XDEBUG_SESSION": "PHPSTORM"})
+        self._do_request_with_body(self._session.post, url, data=data, headers=headers, once=once)
         return self.response
 
     def put(self, url, data, headers=None) -> requests.Response:
