@@ -118,7 +118,7 @@ class Tarallo(object):
             item = Item(json.loads(self.response.content)["data"])
             return item
         elif self.response.status_code == 404:
-            raise ItemNotFoundError("Item " + str(code) + " doesn't exist")
+            raise ItemNotFoundError(f"Item {code} doesn't exist")
 
     def add_item(self, item):
         """Add an item to the database"""
@@ -150,7 +150,7 @@ class Tarallo(object):
         elif self.response.status_code == 400:
             raise ValidationError("Impossible to update feature/s")
         elif self.response.status_code == 404:
-            raise ItemNotFoundError("Item " + str(code) + " doesn't exist")
+            raise ItemNotFoundError(f"Item {code} doesn't exist")
 
     def move(self, code, location):
         """
@@ -163,10 +163,10 @@ class Tarallo(object):
         elif move_status == 400:
             raise ValidationError(f"Cannot move {code} into {location}")
         elif move_status == 404:
-            # TODO: check the response body, raise ItemNotFoundError OR LocationNotFoundError
-            # self.response.content = b'{"status":"error","message":"Parent item doesn\'t exist","code":1}', parse it
-            # and read "code": it's 1 if location doesn't exist, anything else (actually 0 or 2) if item doesn't exist
-            raise ItemNotFoundError("Not found (which one?)")
+            if json.loads(self.response.content)['code'] == 1:
+                raise LocationNotFoundError
+            else:
+                raise ItemNotFoundError(f"Item {code} doesn't exist")
         else:
             raise RuntimeError(f"Move failed with {move_status}")
 
