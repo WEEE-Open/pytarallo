@@ -118,20 +118,26 @@ def test_move_item():
     tarallo_session.logout()
 
 
-def test_move_item_invalid():
+@raises(tarallo.ItemNotFoundError)
+def test_move_item_not_existing():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    assert tarallo_session.move("INVALID", "B103") is False
+    assert tarallo_session.move("INVALID", "B103")
+
+
+@raises(tarallo.LocationNotFoundError)
+def test_move_item_not_existing_location():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
     assert tarallo_session.move("R200", "INVALID") is False
-    tarallo_session.logout()
 
 
+@raises(tarallo.ValidationError)
 def test_move_item_impossible():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
     # Invalid nesting, cannot place a RAM inside a CPU
-    assert tarallo_session.move("R200", "C106") is False
-    tarallo_session.logout()
+    assert tarallo_session.move("R200", "C106")
 
 
 def test_update_one_feature():
@@ -148,7 +154,6 @@ def test_update_one_feature():
     freq_updated = tarallo_session.get_item('R46').features['frequency-hertz']
     assert freq_updated == new_freq
 
-    assert tarallo_session.move("R200", "C106") is False
     tarallo_session.logout()
 
 
@@ -222,7 +227,7 @@ def test_add_item():
     # Let's get it again and check...
     ram = tarallo_session.get_item(ram.code)
     assert ram.path[-1:] == ['LabFis4']
-    assert ram.location == ['LabFis4']
+    assert ram.location == 'LabFis4'
     assert ram.features["type"] == "ram"
     assert ram.features["color"] == "red"
     assert ram.features["capacity-byte"] == 1024 * 1024 * 512
@@ -253,7 +258,7 @@ def test_add_item_cloned():
     # Let's get the entire item again and check...
     cpu = tarallo_session.get_item(cpu.code)
     assert cpu.path[-1:] == ['LabFis4']
-    assert cpu.location == ['LabFis4']
+    assert cpu.location == 'LabFis4'
 
     # This may seem redundant, but these are different feature types...
     assert cpu.features["brand"] == "Intel"
@@ -270,25 +275,42 @@ def test_travaso():
     test_item = tarallo_session.travaso("1", "LabFis4")
     assert test_item is True
 
-    item_A2 = tarallo_session.get_item("A2")
-    assert item_A2 is not None
-    assert type(item_A2) == tarallo.Item
-    assert item_A2.code == 'A2'
-    assert isinstance(item_A2.features, dict)
-    assert item_A2.location == ['LabFis4']
+    item_a2 = tarallo_session.get_item("A2")
+    assert item_a2 is not None
+    assert type(item_a2) == tarallo.Item
+    assert item_a2.code == 'A2'
+    assert isinstance(item_a2.features, dict)
+    assert item_a2.location == 'LabFis4'
 
-    item_B1 = tarallo_session.get_item("B1")
-    assert item_B1 is not None
-    assert type(item_B1) == tarallo.Item
-    assert item_B1.code == 'B1'
-    assert isinstance(item_B1.features, dict)
-    assert item_B1.location == ['LabFis4']
+    item_b1 = tarallo_session.get_item("B1")
+    assert item_b1 is not None
+    assert type(item_b1) == tarallo.Item
+    assert item_b1.code == 'B1'
+    assert isinstance(item_b1.features, dict)
+    assert item_b1.location == 'LabFis4'
 
     tarallo_session.move("A2", "1")
     tarallo_session.move("B1", "1")
+
 
 @raises(tarallo.ItemNotFoundError)
 def test_travaso_invalid_item():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
-    test_item = tarallo_session.travaso("bigasd", "LabFis4")
+    tarallo_session.travaso("BIGASD", "LabFis4")
+
+
+@raises(tarallo.LocationNotFoundError)
+def test_travaso_not_existing_location():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    # TODO: "Cannot move A2 into BIGASD", returns 400... WHY?
+    tarallo_session.travaso("1", "BIGASD")
+
+
+@raises(tarallo.ValidationError)
+def test_travaso_invalid_location():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    # Cannot place the insides of a computer in a CPU
+    tarallo_session.travaso("1", "C123")
