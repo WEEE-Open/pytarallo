@@ -111,7 +111,7 @@ class Tarallo(object):
         except AuthenticationError:
             return self.response.status_code
 
-    def get_item(self, code):
+    def get_item(self, code, depth_limit=None):
         """This method returns an Item instance"""
         self.get(['/v1/items/', self.urlencode(code)])
         if self.response.status_code == 200:
@@ -160,8 +160,15 @@ class Tarallo(object):
             ['v1/items/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
         if move_status == 204 or move_status == 201:
             return True
+        elif move_status == 400:
+            raise ValidationError(f"Cannot move {code} into {location}")
+        elif move_status == 404:
+            # TODO: check the response body, raise ItemNotFoundError OR LocationNotFoundError
+            # self.response.content = b'{"status":"error","message":"Parent item doesn\'t exist","code":1}', parse it
+            # and read "code": it's 1 if location doesn't exist, anything else (actually 0 or 2) if item doesn't exist
+            raise ItemNotFoundError("Not found (which one?)")
         else:
-            return False
+            raise RuntimeError(f"Move failed with {move_status}")
 
     def remove_item(self, code):
         """
@@ -198,15 +205,12 @@ class Tarallo(object):
             return False
 
     def travaso(self, code, location):
-        item = self.get_item(code)
+        item = self.get_item(code, 1)
         codes = []
         for inner in item.contents:
             codes.append(inner.get('code'))
         for inner_code in codes:
-            result_move = self.move(inner_code, location)
-            if result_move is False:
-                # Should probably change to more appropriate custom error
-                raise ItemNotFoundError(inner_code)
+            self.move(inner_code, location)
         return True
 
     def logout(self):
@@ -252,7 +256,7 @@ class Item(object):
                 setattr(self, k, v)
             self.path = self.location
             if len(self.path) >= 1:
-                self.location = self.path[-1:]
+                self.location = self.path[-1:][0]
             else:
                 self.location = None
 
