@@ -269,6 +269,18 @@ def test_add_item_cloned():
     tarallo_session.logout()
 
 
+@raises(tarallo.ValidationError)
+def test_add_item():
+    tarallo_session = Tarallo(t_url, t_user, t_pass)
+    tarallo_session.login()
+    ram = Item()
+    ram.code = "!N\\/@L!D"
+    ram.features["type"] = "ram"
+    ram.location = "LabFis4"
+
+    tarallo_session.add_item(ram)
+
+
 def test_travaso():
     tarallo_session = Tarallo(t_url, t_user, t_pass)
     tarallo_session.login()
