@@ -1,4 +1,4 @@
-# python-tarallo
+# pytarallo
 Python API for the T.A.R.A.L.L.O. Inventory System
 
 ## Development instructions
@@ -34,4 +34,7 @@ or for production only
 
 To run tests type  
 `nosetests -v`  
+
+## pytarallo on Pypi
+You may also get pytarallo through Pypi by using the command `pip install pytarallo`
 
