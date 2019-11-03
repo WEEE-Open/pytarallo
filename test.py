@@ -2,147 +2,98 @@ import tarallo
 from tarallo import Tarallo, Item
 from os import environ as env
 from nose.tools import *
+from dotenv import load_dotenv
+load_dotenv()
 
 try:
     t_url = env['TARALLO_URL']
-    t_user = env['TARALLO_USER']
-    t_pass = env['TARALLO_PASS']
+    t_token = env['TARALLO_TOKEN']
 except KeyError:
     exit(1)
 
 
-@raises(tarallo.AuthenticationError)
 def test_invalid_login():
-    tarallo_session = Tarallo(t_url, 'invalid', 'invalid')
-    tarallo_session.login()
-    # Once an exception is raised, the test terminates...
-    # Any assert after that is simply ignored, place a breakpoint there if you don't believe me...
-    # assert tarallo_session.response.status_code == 400
+    tarallo_session = Tarallo(t_url, 'invalid')
+    assert tarallo_session.status() == 401
 
 
-def test_logout_before_login():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    assert tarallo_session.logout() is False
-    assert tarallo_session.response is None
-
-
-def test_login_and_logout():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    assert tarallo_session.login() is True
-    assert tarallo_session.response.status_code == 204
-    assert tarallo_session.logout() is True
-    assert tarallo_session.response.status_code == 204
+def test_login():
+    tarallo_session = Tarallo(t_url, t_token)
+    assert tarallo_session.status() is 200
 
 
 @raises(tarallo.ItemNotFoundError)
 def test_get_invalid_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.get_item('asd')
-    tarallo_session.logout()
 
 
 def test_get_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     item = tarallo_session.get_item('1')
     assert item is not None
     assert type(item) == tarallo.Item
     assert item.code == '1'
     assert isinstance(item.features, dict)
     assert item.features["type"] == "case"
-    tarallo_session.logout()
-
-
-def test_retry_login():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
-    tarallo_session.logout()
-    assert tarallo_session.status(False) == 401
-    item = tarallo_session.get_item('1')
-    assert item.code == '1'
-    tarallo_session.logout()
-
-
-def test_retry_login_without_previous_login():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    assert tarallo_session.status(False) == 401
-    assert tarallo_session.get_item('1').code == '1'
-    tarallo_session.logout()
 
 
 def test_remove_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     assert tarallo_session.remove_item('R222') is True
     tarallo_session.restore_item('R222', 'B115')
-    tarallo_session.logout()
 
 
 def test_remove_item_twice():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     assert tarallo_session.remove_item('R223') is True
     assert tarallo_session.remove_item('R223') is True
     tarallo_session.restore_item('R223', 'B115')
-    tarallo_session.logout()
 
 
 def test_remove_with_content():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     # This fails because deleting items is like "rm", not "rm -r"
     assert tarallo_session.remove_item('1') is False
-    tarallo_session.logout()
 
 
 def test_remove_invalid_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     assert tarallo_session.remove_item('invalid') is None
-    tarallo_session.logout()
 
 
 def test_restore_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.remove_item('R242')
     assert tarallo_session.restore_item('R242', 'B115') is True
-    tarallo_session.logout()
 
 
 def test_move_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     assert tarallo_session.move("R111", "B30") is True
-    tarallo_session.logout()
 
 
 @raises(tarallo.ItemNotFoundError)
 def test_move_item_not_existing():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     assert tarallo_session.move("INVALID", "B103")
 
 
 @raises(tarallo.LocationNotFoundError)
 def test_move_item_not_existing_location():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     assert tarallo_session.move("R200", "INVALID") is False
 
 
 @raises(tarallo.ValidationError)
 def test_move_item_impossible():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     # Invalid nesting, cannot place a RAM inside a CPU
     assert tarallo_session.move("R200", "C106")
 
 
 def test_update_one_feature():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     freq = tarallo_session.get_item('R46').features['frequency-hertz']
 
     if freq % 2 == 0:
@@ -154,12 +105,9 @@ def test_update_one_feature():
     freq_updated = tarallo_session.get_item('R46').features['frequency-hertz']
     assert freq_updated == new_freq
 
-    tarallo_session.logout()
-
 
 def test_delete_one_feature():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     # Insert a frequency
     assert tarallo_session.update_features('R44', {'frequency-hertz': 266000000})
 
@@ -171,47 +119,40 @@ def test_delete_one_feature():
 
     # Add it again
     assert tarallo_session.update_features('R44', {'frequency-hertz': 266000000})
-    tarallo_session.logout()
 
 
 @raises(tarallo.ValidationError)
 def test_impossible_update():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.update_features('R43', {'color': 'impossible'})
 
 
 @raises(tarallo.ValidationError)
 def test_impossible_update_no_such_feature():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.update_features('R43', {'nonexistent': 'foo'})
 
 
 @raises(tarallo.ValidationError)
 def test_empty_update():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.update_features('R43', {})
 
 
 @raises(tarallo.ItemNotFoundError)
 def test_update_item_not_found():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.update_features('NONEXISTENT', {'color': 'red'})
 
 
 @raises(tarallo.ItemNotFoundError)
 def test_update_item_not_found_2():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.update_features('NONEXISTANT', {'color': None})
 
 
 def test_add_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     ram = Item()
     ram.features["type"] = "ram"
     ram.features["color"] = "red"
@@ -234,8 +175,7 @@ def test_add_item():
 
 
 def test_add_item_cloned():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     cpu = tarallo_session.get_item("C123")
     assert cpu is not None
     # it comes from a computer, path will still contain that, I don't care: I want it in LabFis4.
@@ -266,13 +206,10 @@ def test_add_item_cloned():
     assert cpu.features["cpu-socket"] == "socket478"
     assert cpu.features["frequency-hertz"] == 3060000000
 
-    tarallo_session.logout()
-
 
 @raises(tarallo.ValidationError)
 def test_add_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     ram = Item()
     ram.code = "!N\\/@L!D"
     ram.features["type"] = "ram"
@@ -282,8 +219,7 @@ def test_add_item():
 
 
 def test_travaso():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     test_item = tarallo_session.travaso("1", "LabFis4")
     assert test_item is True
 
@@ -307,22 +243,19 @@ def test_travaso():
 
 @raises(tarallo.ItemNotFoundError)
 def test_travaso_invalid_item():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.travaso("BIGASD", "LabFis4")
 
 
 @raises(tarallo.LocationNotFoundError)
 def test_travaso_not_existing_location():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     # TODO: "Cannot move A2 into BIGASD", returns 400... WHY?
     tarallo_session.travaso("1", "BIGASD")
 
 
 @raises(tarallo.ValidationError)
 def test_travaso_invalid_location():
-    tarallo_session = Tarallo(t_url, t_user, t_pass)
-    tarallo_session.login()
+    tarallo_session = Tarallo(t_url, t_token)
     # Cannot place the insides of a computer in a CPU
     tarallo_session.travaso("1", "C123")

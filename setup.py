@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='pytarallo',
     packages=['pytarallo'],
-    version='0.1',
+    version='1.0',
     url='https://github.com/WEEE-Open/pytarallo',
     download_url='https://github.com/WEEE-Open/pytarallo/archive/0.1.tar.gz',
     license='MIT',
@@ -13,7 +13,7 @@ setup(
     keywords=['WEEEOpen', 'python-tarallo', 'T.A.R.A.L.L.O.', 'Inventory system'],
     install_requires=['requests'],
     extras_require={
-        'dev': ['nose']
+        'dev': ['nose', 'python-dotenv']
     },
     classifiers=[
         'Development Status :: 4 - Beta',
