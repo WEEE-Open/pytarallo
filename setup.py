@@ -5,7 +5,7 @@ setup(
     packages=['pytarallo'],
     version='1.0',
     url='https://github.com/WEEE-Open/pytarallo',
-    download_url='https://github.com/WEEE-Open/pytarallo/archive/0.1.tar.gz',
+    download_url='https://github.com/WEEE-Open/pytarallo/archive/1.0.tar.gz',
     license='MIT',
     author='Various people',
     author_email='',
