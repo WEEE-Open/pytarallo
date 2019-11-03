@@ -26,6 +26,8 @@ export TARALLO_URL=http://127.0.0.1:8080
 export TARALLO_TOKEN=4qzgVAOo_U15EodQ6kukgQ==:6eAT52MyNMkqPVi9sCHeoIphNrdI0yWI2tngJxQLLI8=
 ```
 
+The token is just an example, you need to generate one in T.A.R.A.L.L.O. obviously.
+
 Or, as an alternative, you can add these lines at the end of `venv/bin/activate`. Or you can add them to PyCharm (or whatever other IDE you're using) configuration for the test script launcher.
 
 Activate the virtualenv
