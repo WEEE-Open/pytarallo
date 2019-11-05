@@ -60,3 +60,28 @@ nosetests -v
 
 ## pytarallo on PyPI
 You may also get pytarallo through PyPI by using the command `pip install pytarallo`
+
+## For devs, to publish this repo to PyPI
+
+Clone the repo locally:  
+`git clone https://github.com/WEEE-Open/pytarallo`  
+`cd pytarallo`  
+Update the setup.py so that it contains the correct version and other info (including dependencies):  
+`vim setup.py`  
+Make a venv and activate it:  
+`python3.7 -m venv venv`  
+`source venv/bin/activate`  
+Install required packages for publishing on PyPI:  
+`pip install setuptools wheel twine`  
+Make a directory and copy all the meaningful content from the pytarallo dir:  
+`mkdir pytarallo`  
+`cp LICENSE README.md __init__.py setup.py tarallo.py test.py pytarallo`  
+Make the .tar.gz package:  
+`python setup.py sdist bdist_wheel`  
+Upload the output packages to PyPI:  
+`twine upload dist/*`  
+
+This last step requires:
+- you having an account on pypi.org
+- your account being owner or maintainer of the pytarallo package
+- you entering your username and password when prompted by twine
