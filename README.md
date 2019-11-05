@@ -61,7 +61,7 @@ nosetests -v
 ## pytarallo on PyPI
 You may also get pytarallo through PyPI by using the command `pip install pytarallo`
 
-## For devs, to publish this repo to PyPI
+## For devs, to publish this repo on PyPI
 
 Clone the repo locally:  
 `git clone https://github.com/WEEE-Open/pytarallo`  
