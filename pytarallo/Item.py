@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any, List
 
 
-class Item(object):
+class Item:
     """This class implements a pseudo-O(R)M"""
     code: Optional[str]
     features: Dict[str, Any]
