@@ -40,6 +40,9 @@ def test_get_item():
     assert item.code == '1'
     assert isinstance(item.features, dict)
     assert item.features["type"] == "case"
+    assert item.path[-2:-1][0] == "Polito"
+    assert item.path[-1:][0] == "Magazzino"
+    assert item.location == "Magazzino"
 
 
 def test_remove_item():
