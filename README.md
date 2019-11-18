@@ -68,14 +68,10 @@ Clone the repo locally:
 `cd pytarallo`  
 Update the setup.py so that it contains the correct version and other info (including dependencies):  
 `vim setup.py`  
-Make a venv and activate it:  
-`python3.7 -m venv venv`  
+Enter in the virtual environment:  
 `source venv/bin/activate`  
 Install required packages for publishing on PyPI:  
 `pip install setuptools wheel twine`  
-Make a directory and copy all the meaningful content from the pytarallo dir:  
-`mkdir pytarallo`  
-`cp LICENSE README.md __init__.py setup.py tarallo.py test.py pytarallo`  
 Make the .tar.gz package:  
 `python setup.py sdist bdist_wheel`  
 Upload the output packages to PyPI:  
