@@ -1,6 +1,8 @@
 import json
 import urllib.parse
+from typing import Optional
 
+from pytarallo.AuditEntry import AuditEntry, AuditChanges
 from pytarallo.Errors import *
 from pytarallo.Item import Item
 import requests
@@ -203,3 +205,23 @@ class Tarallo(object):
         for inner_code in codes:
             self.move(inner_code, location)
         return True
+
+    def get_history(self, code, limit: Optional[int] = None):
+        url = f'/v2/items/{self.urlencode(code)}/history'
+        if limit is not None:
+            url += '?length=' + str(int(limit))
+        history = self.get(url)
+
+        if history.status_code == 200:
+            result = []
+            for entry in history.json():
+                try:
+                    change = AuditChanges(entry["change"])
+                except ValueError:
+                    change = AuditChanges.Unknown
+                result.append(AuditEntry(entry["user"], change, float(entry["time"]), entry["other"]))
+            return result
+        elif history.status_code == 404:
+            raise ItemNotFoundError(f"Item {code} doesn\'t exist")
+        else:
+            raise RuntimeError("Unexpected return code")

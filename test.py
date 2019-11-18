@@ -2,6 +2,7 @@ from os import environ as env
 from nose.tools import *
 from dotenv import load_dotenv
 
+from pytarallo.AuditEntry import AuditEntry
 from pytarallo.Item import Item
 from pytarallo.Tarallo import Tarallo
 from pytarallo.Errors import ItemNotFoundError, LocationNotFoundError, ValidationError
@@ -43,6 +44,18 @@ def test_get_item():
     assert item.path[-2:-1][0] == "Polito"
     assert item.path[-1:][0] == "Magazzino"
     assert item.location == "Magazzino"
+
+
+def test_get_item_history():
+    tarallo_session = Tarallo(t_url, t_token)
+    history = tarallo_session.get_history('1')
+    assert history is not None
+    assert len(history) > 0
+    for entry in history:
+        assert isinstance(entry, AuditEntry)
+        assert entry.user is not None
+        assert entry.time is not None
+        assert entry.time > 0
 
 
 def test_remove_item():
