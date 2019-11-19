@@ -1,3 +1,4 @@
+from collections import Iterable
 from os import environ as env
 from nose.tools import *
 from dotenv import load_dotenv
@@ -279,3 +280,35 @@ def test_travaso_invalid_location():
     tarallo_session = Tarallo(t_url, t_token)
     # Cannot place the insides of a computer in a CPU
     tarallo_session.travaso("1", "C123")
+
+
+def test_codes_by_feature():
+    tarallo_session = Tarallo(t_url, t_token)
+    codes = tarallo_session.get_codes_by_feature("sn", "MB-1234567890")
+    assert isinstance(codes, Iterable)
+    # noinspection PyTypeChecker
+    assert len(codes) > 0
+    # These are all motherboards
+    for code in codes:
+        assert isinstance(code, str)
+        assert code.startswith('B')
+        assert code[1:].isdigit()
+
+
+def test_codes_by_feature_none():
+    tarallo_session = Tarallo(t_url, t_token)
+    codes = tarallo_session.get_codes_by_feature("sn", "invalid-serial-number-doesnt-exist")
+    assert len(codes) == 0
+
+
+@raises(ValidationError)
+def test_codes_by_feature_invalid_feature():
+    tarallo_session = Tarallo(t_url, t_token)
+    tarallo_session.get_codes_by_feature("invalid-feature", "test")
+
+
+@raises(ValidationError)
+def test_codes_by_feature_invalid_feature():
+    tarallo_session = Tarallo(t_url, t_token)
+    # Cannot do an exact match on float/double values
+    tarallo_session.get_codes_by_feature("psu-vol", "17.3")

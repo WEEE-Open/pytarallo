@@ -225,3 +225,15 @@ class Tarallo(object):
             raise ItemNotFoundError(f"Item {code} doesn\'t exist")
         else:
             raise RuntimeError("Unexpected return code")
+
+    def get_codes_by_feature(self, feature: str, value: str):
+        url = f"/v2/features/{self.urlencode(feature)}/{self.urlencode(value)}"
+        items = self.get(url)
+
+        if items.status_code == 200:
+            return items.json()
+        elif items.status_code == 400:
+            exception = items.json()
+            raise ValidationError(exception.get('message', 'No message from the server'))
+        else:
+            raise RuntimeError("Unexpected return code")
