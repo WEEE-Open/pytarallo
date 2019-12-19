@@ -24,13 +24,15 @@ class Item:
 
         if data is not None:
             for k, v in data.items():
-                setattr(self, k, v)
+                # setattr(self, k, v)
+                self.features[k] = v
+
             # TODO: what's happening here?
-            self.path = self.location
+    ''' self.path = self.location
             if len(self.path) >= 1:
                 self.location = self.path[-1:][0]
             else:
-                self.location = None
+                self.location = None'''
 
     def serializable(self):
         result = {}
@@ -46,4 +48,18 @@ class Item:
                 result['contents'].append(item.serializable())
         return result
 
+    def add_feature(self, key: str, value: Any):
+        self.features[key] = value
 
+    def add_content(self, item: Any):
+        self.contents.append(Item(item))
+
+    def set_location(self, location: str):
+        self.location = location
+
+    def __str__(self):
+        s = str(self.features)
+        for e in self.contents:
+            s = s + "\n"
+            s = s + str(e)
+        return s
