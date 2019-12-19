@@ -2,9 +2,9 @@ import json
 import urllib.parse
 from typing import Optional
 
-from pytarallo.AuditEntry import AuditEntry, AuditChanges
-from pytarallo.Errors import *
-from pytarallo.Item import Item
+from AuditEntry import AuditEntry, AuditChanges
+from Errors import *
+from Item import Item
 import requests
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
@@ -33,9 +33,11 @@ class Tarallo(object):
         return self.url + url
 
     def __check_response(self):
+        print(self.response)
         if self.response.status_code == 401:
             raise AuthenticationError
         if self.response.status_code not in VALID_RESPONSES:
+            print(self.response.status_code)
             raise ServerError
 
     # requests.Session() wrapper methods
