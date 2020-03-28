@@ -15,8 +15,7 @@ try:
     t_url = env['TARALLO_URL']
     t_token = env['TARALLO_TOKEN']
 except KeyError:
-    exit(1)
-
+    raise EnvironmentError("Missing definitions of TARALLO_* environment variables (see README)")
 
 def test_invalid_login():
     tarallo_session = Tarallo(t_url, 'invalid')
