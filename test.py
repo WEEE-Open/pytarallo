@@ -25,7 +25,7 @@ def test_invalid_login():
 
 def test_login():
     tarallo_session = Tarallo(t_url, t_token)
-    assert tarallo_session.status() is 200
+    assert tarallo_session.status() == 200
 
 
 @raises(ItemNotFoundError)
@@ -61,21 +61,21 @@ def test_get_item_history():
 
 def test_remove_item():
     tarallo_session = Tarallo(t_url, t_token)
-    assert tarallo_session.remove_item('R222') is True
+    assert tarallo_session.remove_item('R222')
     tarallo_session.restore_item('R222', 'B115')
 
 
 def test_remove_item_twice():
     tarallo_session = Tarallo(t_url, t_token)
-    assert tarallo_session.remove_item('R223') is True
-    assert tarallo_session.remove_item('R223') is True
+    assert tarallo_session.remove_item('R223')
+    assert tarallo_session.remove_item('R223')
     tarallo_session.restore_item('R223', 'B115')
 
 
 def test_remove_with_content():
     tarallo_session = Tarallo(t_url, t_token)
     # This fails because deleting items is like "rm", not "rm -r"
-    assert tarallo_session.remove_item('1') is False
+    assert not tarallo_session.remove_item('1')
 
 
 def test_remove_invalid_item():
@@ -86,12 +86,12 @@ def test_remove_invalid_item():
 def test_restore_item():
     tarallo_session = Tarallo(t_url, t_token)
     tarallo_session.remove_item('R242')
-    assert tarallo_session.restore_item('R242', 'B115') is True
+    assert tarallo_session.restore_item('R242', 'B115')
 
 
 def test_move_item():
     tarallo_session = Tarallo(t_url, t_token)
-    assert tarallo_session.move("R111", "B30") is True
+    assert tarallo_session.move("R111", "B30")
 
 
 @raises(ItemNotFoundError)
@@ -103,7 +103,7 @@ def test_move_item_not_existing():
 @raises(LocationNotFoundError)
 def test_move_item_not_existing_location():
     tarallo_session = Tarallo(t_url, t_token)
-    assert tarallo_session.move("R200", "INVALID") is False
+    assert not tarallo_session.move("R200", "INVALID")
 
 
 @raises(ValidationError)
@@ -180,7 +180,7 @@ def test_add_item():
     ram.features["capacity-byte"] = 1024 * 1024 * 512  # 512 MiB
     ram.location = "LabFis4"
 
-    assert tarallo_session.add_item(ram) is True
+    assert tarallo_session.add_item(ram)
 
     # set the code to the one received from the server
     assert ram.code is not None
@@ -206,7 +206,7 @@ def test_add_item_cloned():
     # can't test manually assigned codes... or rather we can, but just once)
     cpu.code = None
     # Add it: should succeed
-    assert tarallo_session.add_item(cpu) is True
+    assert tarallo_session.add_item(cpu)
 
     # This stuff should be updated
     assert cpu.code is not None
@@ -242,7 +242,7 @@ def test_add_item():
 def test_travaso():
     tarallo_session = Tarallo(t_url, t_token)
     test_item = tarallo_session.travaso("1", "LabFis4")
-    assert test_item is True
+    assert test_item
 
     item_a2 = tarallo_session.get_item("A2")
     assert item_a2 is not None
