@@ -1,11 +1,11 @@
 import json
 import urllib.parse
+import requests
 from typing import Optional
 
-from AuditEntry import AuditEntry, AuditChanges
-from Errors import *
-from Item import Item
-import requests
+from pytarallo.AuditEntry import AuditEntry, AuditChanges
+from pytarallo.Errors import *
+from pytarallo.Item import Item
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
