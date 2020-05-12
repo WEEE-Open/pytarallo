@@ -33,11 +33,9 @@ class Tarallo(object):
         return self.url + url
 
     def __check_response(self):
-        print(self.response)
         if self.response.status_code == 401:
             raise AuthenticationError
         if self.response.status_code not in VALID_RESPONSES:
-            print(self.response.status_code)
             raise ServerError
 
     # requests.Session() wrapper methods
