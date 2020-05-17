@@ -38,7 +38,7 @@ def test_get_item():
     item = tarallo_session.get_item('schifomacchina')
     assert item is not None
     assert type(item) == Item
-    assert item.code == 'schifomacchina'
+    assert item.code == 'SCHIFOMACCHINA'
     assert isinstance(item.features, dict)
     assert item.features["type"] == "case"
     assert item.path[0] == "Polito"
@@ -178,7 +178,7 @@ def test_add_item():
     ram.features["type"] = "ram"
     ram.features["color"] = "red"
     ram.features["capacity-byte"] = 1024 * 1024 * 512  # 512 MiB
-    ram.location = "LabFis4"
+    ram.location = "Table"
 
     assert tarallo_session.add_item(ram)
 
@@ -188,8 +188,8 @@ def test_add_item():
 
     # Let's get it again and check...
     ram = tarallo_session.get_item(ram.code)
-    assert ram.path[-1:] == ['LabFis4']
-    assert ram.location == 'LabFis4'
+    assert ram.path[-1:] == ['Table']
+    assert ram.location == 'Table'
     assert ram.features["type"] == "ram"
     assert ram.features["color"] == "red"
     assert ram.features["capacity-byte"] == 1024 * 1024 * 512
@@ -199,9 +199,9 @@ def test_add_item_cloned():
     tarallo_session = Tarallo(t_url, t_token)
     cpu = tarallo_session.get_item("C1")
     assert cpu is not None
-    # it comes from a computer, path will still contain that, I don't care: I want it in LabFis4.
+    # it comes from a computer, path will still contain that, I don't care: I want it on the Table.
     # Send this location to the server, not the path.
-    cpu.location = "LabFis4"
+    cpu.parent = "Table"
     # Let the server generate another code (since there's no way to delete items permanently we
     # can't test manually assigned codes... or rather we can, but just once)
     cpu.code = None
@@ -218,8 +218,8 @@ def test_add_item_cloned():
 
     # Let's get the entire item again and check...
     cpu = tarallo_session.get_item(cpu.code)
-    assert cpu.path[-1:] == ['LabFis4']
-    assert cpu.location == 'LabFis4'
+    assert cpu.path[-1:] == ['Table']
+    assert cpu.location == 'Table'
 
     # This may seem redundant, but these are different feature types...
     assert cpu.features["brand"] == "AMD"
@@ -234,14 +234,14 @@ def test_add_item():
     ram = Item()
     ram.code = "!N\\/@L!D"
     ram.features["type"] = "ram"
-    ram.location = "LabFis4"
+    ram.location = "Table"
 
     tarallo_session.add_item(ram)
 
 
 def test_travaso():
     tarallo_session = Tarallo(t_url, t_token)
-    test_item = tarallo_session.travaso("schifomacchina", "LabFis4")
+    test_item = tarallo_session.travaso("schifomacchina", "RamBox")
     assert test_item
 
     item_r69 = tarallo_session.get_item("R69")
@@ -265,7 +265,7 @@ def test_travaso():
 @raises(ItemNotFoundError)
 def test_travaso_invalid_item():
     tarallo_session = Tarallo(t_url, t_token)
-    tarallo_session.travaso("BIGASD", "LabFis4")
+    tarallo_session.travaso("BIGASD", "Table")
 
 
 @raises(LocationNotFoundError)
