@@ -1,11 +1,11 @@
 import json
 import urllib.parse
+import requests
 from typing import Optional
 
-from AuditEntry import AuditEntry, AuditChanges
-from Errors import *
-from Item import Item
-import requests
+from pytarallo.AuditEntry import AuditEntry, AuditChanges
+from pytarallo.Errors import *
+from pytarallo.Item import Item
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
@@ -20,7 +20,7 @@ class Tarallo(object):
         :param token: Token (go to Options > Get token)
         """
         self.url = url.rstrip('/')
-        self.token = token
+        self.token = token.strip()
         self.__session = requests.Session()
         self.response = None
 
@@ -33,25 +33,23 @@ class Tarallo(object):
         return self.url + url
 
     def __check_response(self):
-        print(self.response)
         if self.response.status_code == 401:
             raise AuthenticationError
         if self.response.status_code not in VALID_RESPONSES:
-            print(self.response.status_code)
             raise ServerError
 
     # requests.Session() wrapper methods
     # These guys implement further checks
     def get(self, url) -> requests.Response:
         url = self.__prepare_url(url)
-        headers = {"Authorization": "Token " + self.token.replace('\n', '').replace('\r', '')}
+        headers = {"Authorization": "Token " + self.token}
         self.response = self.__session.get(url, headers=headers)
         self.__check_response()
         return self.response
 
     def delete(self, url) -> requests.Response:
         url = self.__prepare_url(url)
-        headers = {"Authorization": "Token " + self.token.replace('\n', '').replace('\r', '')}
+        headers = {"Authorization": "Token " + self.token}
         self.response = self.__session.delete(url, headers=headers)
         self.__check_response()
         return self.response
@@ -61,7 +59,7 @@ class Tarallo(object):
             headers = {}
         if "Content-Type" not in headers:
             headers["Content-Type"] = "application/json"
-        headers["Authorization"] = "Token " + self.token.replace('\n', '').replace('\r', '')
+        headers["Authorization"] = "Token " + self.token 
         url = self.__prepare_url(url)
         self.response = self.__session.post(url, data=data, headers=headers)
         self.__check_response()
@@ -72,7 +70,7 @@ class Tarallo(object):
             headers = {}
         if "Content-Type" not in headers:
             headers["Content-Type"] = "application/json"
-        headers["Authorization"] = "Token " + self.token.replace('\n', '').replace('\r', '')
+        headers["Authorization"] = "Token " + self.token
         url = self.__prepare_url(url)
         self.response = self.__session.put(url, data=data, headers=headers)
         self.__check_response()
@@ -83,7 +81,7 @@ class Tarallo(object):
             headers = {}
         if "Content-Type" not in headers:
             headers["Content-Type"] = "application/json"
-        headers["Authorization"] = "Token " + self.token.replace('\n', '').replace('\r', '')
+        headers["Authorization"] = "Token " + self.token
         # , cookies={"XDEBUG_SESSION": "PHPSTORM"}
         url = self.__prepare_url(url)
         self.response = self.__session.patch(url, data=data, headers=headers)
