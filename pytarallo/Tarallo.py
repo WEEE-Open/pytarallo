@@ -114,7 +114,7 @@ class Tarallo(object):
             raise ItemNotFoundError(f"Item {code} doesn't exist")
 
     def add_item(self, item):
-        """Add an item to the database"""
+        """Add an item to the database and eventually update its code"""
         if item.code is not None:  # check whether an item's code was manually added
             self.put([f'/v2/items/{item.code}'],
                      data=json.dumps(item.serializable()))
