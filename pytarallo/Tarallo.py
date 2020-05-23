@@ -200,8 +200,8 @@ class Tarallo(object):
     def travaso(self, code, location):
         item = self.get_item(code, 1)
         codes = []
-        for inner in item.contents:
-            codes.append(inner.get('code'))
+        for inner_item in item.contents:
+            codes.append(inner_item.code)
         for inner_code in codes:
             self.move(inner_code, location)
         return True

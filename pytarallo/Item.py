@@ -8,8 +8,9 @@ class Item:
     contents: List[Any]  # Other Item objects, actually
     location: Optional[str]
     path: List[str]
+    parent: Optional[str]
 
-    def __init__(self, data=None):
+    def __init__(self, data: dict = None):
         """
         Items are generally created by the get_item method
         But could be created somewhere else and then added to the
@@ -36,11 +37,14 @@ class Item:
             # the tarallo server returns an JSON object containing only the "location" attribute, which corresponds
             # to the path as defined above
 
-            self.path = data['location']
+            self.path = data.get('location')
             if self.path is not None and len(self.path) >= 1:
                 self.location = self.path[-1]
-            else:
-                self.location = None
+
+            # load the eventual content of the item from data
+            if data.get('contents') is not None:
+                for inner_item_data in data['contents']:
+                    self.contents.append(Item(inner_item_data))
 
     def serializable(self):
         result = {}
