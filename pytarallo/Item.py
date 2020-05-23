@@ -24,6 +24,8 @@ class Item:
         self.parent = None
 
         if data is not None:
+            self.code = data['code']
+
             for k, v in data['features'].items():
                 # setattr(self, k, v)
                 self.features[k] = v
