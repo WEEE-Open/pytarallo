@@ -43,8 +43,8 @@ def test_get_item():
     assert item.features["type"] == "case"
     assert item.path[0] == "Polito"
     assert item.path[1] == "Chernobyl"
-    assert item.path[2] == "Tables"
-    assert item.location == "Tables"
+    assert item.path[2] == "Table"
+    assert item.location == "Table"
 
 
 def test_get_item_history():
