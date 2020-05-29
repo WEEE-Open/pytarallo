@@ -114,7 +114,7 @@ class Tarallo(object):
             raise ItemNotFoundError(f"Item {code} doesn't exist")
 
     def add_item(self, item):
-        """Add an item to the database"""
+        """Add an item to the database and eventually update its code"""
         if item.code is not None:  # check whether an item's code was manually added
             self.put([f'/v2/items/{item.code}'],
                      data=json.dumps(item.serializable()))
@@ -200,8 +200,8 @@ class Tarallo(object):
     def travaso(self, code, location):
         item = self.get_item(code, 1)
         codes = []
-        for inner in item.contents:
-            codes.append(inner.get('code'))
+        for inner_item in item.contents:
+            codes.append(inner_item.code)
         for inner_code in codes:
             self.move(inner_code, location)
         return True

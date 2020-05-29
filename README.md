@@ -14,7 +14,7 @@ python3 -m venv venv
 or using virtualenv
 
 ```shell script
-`virtualenv -p python3 venv`
+virtualenv -p python3 venv
 ```  
 
 ### 2. Add some environment variables
@@ -63,21 +63,32 @@ You may also get pytarallo through PyPI by using the command `pip install pytara
 
 ## For devs, to publish this repo on PyPI
 
-Clone the repo locally:  
-`git clone https://github.com/WEEE-Open/pytarallo`  
-`cd pytarallo`  
-Update the setup.py so that it contains the correct version and other info (including dependencies):  
-`vim setup.py`  
-Enter in the virtual environment:  
-`source venv/bin/activate`  
-Install required packages for publishing on PyPI:  
-`pip install setuptools wheel twine`  
-Make the .tar.gz package:  
-`python setup.py sdist bdist_wheel`  
-Upload the output packages to PyPI:  
-`twine upload dist/*`  
+1. Clone the repo locally
+    ```
+    git clone https://github.com/WEEE-Open/pytarallo && cd pytarallo
+    ```
+2. Update the setup.py so that it contains the correct version and other info (including dependencies)
+    ```
+    vim setup.py
+    ```
+3. Enter in the virtual environment
+    ```
+    source venv/bin/activate
+    ```
+4. Install required packages for publishing on PyPI
+    ```
+    pip install setuptools wheel twine
+    ```
+5. Build the .tar.gz package
+    ```
+    python setup.py sdist bdist_wheel
+    ```
+6. Upload the output packages to PyPI:  
+    ```
+    twine upload dist/*
+    ```
 
-This last step requires:
-- you having an account on pypi.org
-- your account being owner or maintainer of the pytarallo package
-- you entering your username and password when prompted by twine
+    This last step requires:
+    - you having an account on pypi.org
+    - your account being owner or maintainer of the pytarallo package
+    - you entering your username and password when prompted by twine

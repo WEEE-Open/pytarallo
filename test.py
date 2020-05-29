@@ -43,8 +43,8 @@ def test_get_item():
     assert item.features["type"] == "case"
     assert item.path[0] == "Polito"
     assert item.path[1] == "Chernobyl"
-    assert item.path[2] == "Tables"
-    assert item.location == "Tables"
+    assert item.path[2] == "Table"
+    assert item.location == "Table"
 
 
 def test_get_item_history():
@@ -130,16 +130,16 @@ def test_update_one_feature():
 def test_delete_one_feature():
     tarallo_session = Tarallo(t_url, t_token)
     # Insert a frequency
-    assert tarallo_session.update_features('R199', {'frequency-hertz': 266000000})
+    assert tarallo_session.update_features('R70', {'frequency-hertz': 800000000})
 
     # Remove it
-    assert tarallo_session.update_features('R199', {'frequency-hertz': None})
+    assert tarallo_session.update_features('R70', {'frequency-hertz': None})
 
     # Check that it's gone
-    assert 'frequency-hertz' not in tarallo_session.get_item('R199').features
+    assert 'frequency-hertz' not in tarallo_session.get_item('R70').features
 
     # Add it again
-    assert tarallo_session.update_features('R199', {'frequency-hertz': 266000000})
+    assert tarallo_session.update_features('R70', {'frequency-hertz': 800000000})
 
 
 @raises(ValidationError)
@@ -249,12 +249,12 @@ def test_travaso():
     assert type(item_r69) == Item
     assert item_r69.code == 'R69'
     assert isinstance(item_r69.features, dict)
-    assert item_a2.location == 'RamBox'
+    assert item_r69.location == 'RamBox'
 
     item_r188 = tarallo_session.get_item("R188")
     assert item_r188 is not None
     assert type(item_r188) == Item
-    assert item_b1.code == 'R188'
+    assert item_r188.code == 'R188'
     assert isinstance(item_r188.features, dict)
     assert item_r188.location == 'RamBox'
 
@@ -271,8 +271,7 @@ def test_travaso_invalid_item():
 @raises(LocationNotFoundError)
 def test_travaso_not_existing_location():
     tarallo_session = Tarallo(t_url, t_token)
-    # TODO: "Cannot move R69 into BIGASD", returns 400... WHY?
-    tarallo_session.travaso("R69", "BIGASD")
+    tarallo_session.travaso("schifomacchina", "BIGASD")
 
 
 @raises(ValidationError)
@@ -284,7 +283,7 @@ def test_travaso_invalid_location():
 
 def test_codes_by_feature():
     tarallo_session = Tarallo(t_url, t_token)
-    codes = tarallo_session.get_codes_by_feature("sn", "ASD30391743168B7")
+    codes = tarallo_session.get_codes_by_feature("model", "S667ABC256")
     assert isinstance(codes, Iterable)
     # noinspection PyTypeChecker
     assert len(codes) > 0

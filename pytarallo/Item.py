@@ -8,8 +8,9 @@ class Item:
     contents: List[Any]  # Other Item objects, actually
     location: Optional[str]
     path: List[str]
+    parent: Optional[str]
 
-    def __init__(self, data=None):
+    def __init__(self, data: dict = None):
         """
         Items are generally created by the get_item method
         But could be created somewhere else and then added to the
@@ -21,25 +22,40 @@ class Item:
         self.contents = list()
         self.location = None
         self.path = []
+        self.parent = None
 
         if data is not None:
-            for k, v in data.items():
+            self.code = data['code']
+
+            for k, v in data['features'].items():
                 # setattr(self, k, v)
                 self.features[k] = v
 
-            # TODO: what's happening here?
-    ''' self.path = self.location
-            if len(self.path) >= 1:
-                self.location = self.path[-1:][0]
-            else:
-                self.location = None'''
+            # setup path and location
+            # location: the most specific postion where the item is located, e.g. "Table"
+            # path: a list representing the hierarchy of locations the item, e.g. ["Polito", "Chernobyl", "Table"]
+            # the tarallo server returns an JSON object containing only the "location" attribute, which corresponds
+            # to the path as defined above
+
+            self.path = data.get('location')
+            if self.path is not None and len(self.path) >= 1:
+                self.location = self.path[-1]
+
+            # load the eventual content of the item from data
+            if data.get('contents') is not None:
+                for inner_item_data in data['contents']:
+                    self.contents.append(Item(inner_item_data))
 
     def serializable(self):
         result = {}
         if self.code is not None:
             result['code'] = self.code
+
         if self.location is not None:
             result['parent'] = self.location
+        elif self.parent is not None:
+            result['parent'] = self.parent
+
         result['features'] = self.features
         if len(self.contents) > 0:
             result['contents'] = []
