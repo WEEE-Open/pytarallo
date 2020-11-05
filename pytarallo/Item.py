@@ -1,10 +1,12 @@
 from typing import Optional, Dict, Any, List
+from pytarallo.src.Product import Product
 
 
 class Item:
     """This class implements a pseudo-O(R)M"""
     code: Optional[str]
     features: Dict[str, Any]
+    product: Product
     contents: List[Any]  # Other Item objects, actually
     location: Optional[str]
     path: List[str]
@@ -32,7 +34,7 @@ class Item:
                 self.features[k] = v
 
             # setup path and location
-            # location: the most specific postion where the item is located, e.g. "Table"
+            # location: the most specific position where the item is located, e.g. "Table"
             # path: a list representing the hierarchy of locations the item, e.g. ["Polito", "Chernobyl", "Table"]
             # the tarallo server returns an JSON object containing only the "location" attribute, which corresponds
             # to the path as defined above
