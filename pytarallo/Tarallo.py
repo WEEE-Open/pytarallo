@@ -2,12 +2,14 @@ import json
 import urllib.parse
 import pytarallo.Errors as Errors
 from typing import Optional
+from pytarallo.Product import Product
+
 
 import requests
 
 from pytarallo.AuditEntry import AuditEntry, AuditChanges
 from pytarallo.Item import Item
-#from src.src.Errors import *
+#from pytarallo.pytarallo.Errors import *
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
@@ -115,16 +117,16 @@ class Tarallo(object):
         elif self.response.status_code == 404:
             raise Errors.ItemNotFoundError(f"Item {code} doesn't exist")
 
-        def get_product(self, model):
-            """returns an instance of Product retrieved from the server
+    def get_product(self, model):
+        """returns an instance of Product retrieved from the server
 
-            Args:
-                self, model
+        Args:
+            self, model
 
-            Returns:
-                Product
-            """
-            #TODO
+        Returns:
+            Product
+        """
+        #TODO
 
     def add_item(self, item):
         """Add an item to the database and eventually update its code
@@ -150,12 +152,12 @@ class Tarallo(object):
         """adds a product to the database or updates its code
 
         Args:
-            self, product: Prodcut
+            self, product: ProductToUpload
 
         Returns:
             True if success, Errors exeptions otherwise
         """
-        #TODO
+        # TODO: the product infos are in the url
 
 
 
