@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any, List
-from pytarallo.src.Product import Product
+from pytarallo.Product import Product
 
 
 class Item:
@@ -8,45 +8,46 @@ class Item:
     features: Dict[str, Any]
     product: Product
     contents: List[Any]  # Other Item objects, actually
-    location: Optional[str]
+    location: List[Any]  # TODO: is it a path (place1/place2/place3) or just a string?
     path: List[str]
-    parent: Optional[str]
 
     def __init__(self, data: dict = None):
         """
-        Items are generally created by the get_item method
-        But could be created somewhere else and then added to the
-        database using the add_item method
+        Items are created by the get_item method
         params: data: a dict() containing the item's data.
         """
         self.code = None
         self.features = {}
+        self.product = None #TODO: can't find a reference on the wiki
         self.contents = list()
         self.location = None
-        self.path = []
-        self.parent = None
+        self.path = [] #TODO: merge with location
 
         if data is not None:
-            self.code = data['code']
-
-            for k, v in data['features'].items():
-                # setattr(self, k, v)
-                self.features[k] = v
-
             # setup path and location
             # location: the most specific position where the item is located, e.g. "Table"
             # path: a list representing the hierarchy of locations the item, e.g. ["Polito", "Chernobyl", "Table"]
             # the tarallo server returns an JSON object containing only the "location" attribute, which corresponds
             # to the path as defined above
+            if data.get('code') is not None:
+                self.code = data['code']
 
-            self.path = data.get('location')
+            for k, v in data['features'].items():
+                # setattr(self, k, v)
+                self.features[k] = v
+
+            self.path = data.get('location') #TODO: remove, no location in the JSON wiki
             if self.path is not None and len(self.path) >= 1:
                 self.location = self.path[-1]
 
             # load the eventual content of the item from data
             if data.get('contents') is not None:
-                for inner_item_data in data['contents']:
-                    self.contents.append(Item(inner_item_data))
+                self.set_contents(data.get('contents'))
+
+    def set_contents(self, contents: list = None):
+        """setter for the contents of the object"""
+        for inner_item_data in contents:
+            self.contents.append(Item(inner_item_data))
 
     def serializable(self):
         result = {}
@@ -55,8 +56,6 @@ class Item:
 
         if self.location is not None:
             result['parent'] = self.location
-        elif self.parent is not None:
-            result['parent'] = self.parent
 
         result['features'] = self.features
         if len(self.contents) > 0:
