@@ -4,12 +4,13 @@ import pytarallo.Errors as Errors
 from typing import Optional
 from pytarallo.Product import Product
 
-
 import requests
 
+from pytarallo import ProductToUpload, ItemToUpload
 from pytarallo.AuditEntry import AuditEntry, AuditChanges
 from pytarallo.Item import Item
-#from pytarallo.pytarallo.Errors import *
+
+# from pytarallo.pytarallo.Errors import *
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
@@ -63,7 +64,7 @@ class Tarallo(object):
             headers = {}
         if "Content-Type" not in headers:
             headers["Content-Type"] = "application/json"
-        headers["Authorization"] = "Token " + self.token 
+        headers["Authorization"] = "Token " + self.token
         url = self.__prepare_url(url)
         self.response = self.__session.post(url, data=data, headers=headers)
         self.__check_response()
@@ -107,7 +108,7 @@ class Tarallo(object):
 
     def get_item(self, code, depth_limit=None):
         """This method returns an Item instance recieved from the server"""
-        url = '/v2/items/' + self.urlencode(code)
+        url = '/v2/items/' + self.urlencode(code) + '?separate' # try an Item without product6
         if depth_limit is not None:
             url += '?depth=' + str(int(depth_limit))
         self.get(url)
@@ -117,20 +118,49 @@ class Tarallo(object):
         elif self.response.status_code == 404:
             raise Errors.ItemNotFoundError(f"Item {code} doesn't exist")
 
-    def get_product(self, model):
-        """returns an instance of Product retrieved from the server
+    def get_product_list(self, brand, model, variant):
+        """returns an list of Product retrieved from the server
 
         Args:
-            self, model
+            self, brand: str, model: str, variant: str
 
         Returns:
             Product
         """
-        #TODO
+        # TODO:  tests
 
-    def add_item(self, item):
+        url = '/v2/products/' + brand + model + variant
+        self.get(url)
+        if self.response.status_code == 200:
+            res = json.loads(self.response.content)
+            product_list = []
+            for p in res:
+                product_list.append(Product(p))
+                return product_list
+        elif self.response.status_code == 404:
+            raise Errors.ProductNotFoundError("Product doesn't exists.")
+
+    def get_product(self, brand, model):
+        """Retrieve a product from the server
+
+        Args:
+            self
+
+        Returns:
+            lsit of Product
+        """
+        # TODO: tests
+        url = '/v2/products/' + brand + model
+        self.get(url)
+        if self.response.status_code == 200:
+            res = json.loads(self.response.content)
+            p = Product(res)
+        elif self.response.status_code == 404:
+            raise Errors.ProductNotFoundError("Product doesn't exists.")
+
+    def add_item(self, item: ItemToUpload):
         """Add an item to the database and eventually update its code
-            TODO: change item to ItemToUpload instance"""
+            """
         if item.code is not None:  # check whether an item's code was manually added
             self.put([f'/v2/items/{item.code}'],
                      data=json.dumps(item.serializable()))
@@ -141,14 +171,14 @@ class Tarallo(object):
 
         if added_item_status == 201:
             item.code = json.loads(self.response.content)
-            item.path = None
+            item.location = None
             return True
         elif added_item_status == 400 or added_item_status == 404:
             raise Errors.ValidationError
         elif added_item_status == 403:
             raise Errors.NotAuthorizedError
 
-    def add_product(self, product: Product):
+    def add_product(self, product: ProductToUpload):
         """adds a product to the database or updates its code
 
         Args:
@@ -157,9 +187,16 @@ class Tarallo(object):
         Returns:
             True if success, Errors exeptions otherwise
         """
-        # TODO: the product infos are in the url
-
-
+        # TODO: tests
+        self.put([f'/v2/products/{product.brand}/{product.model}/{product.variant}'],
+                 data=json.dumps(product.serializable()))
+        added_product_status = self.response.status_code
+        if added_product_status == 201:
+            return True
+        elif added_product_status == 400 or added_product_status == 404:
+            raise Errors.ValidationError
+        elif added_product_status == 403:
+            raise Errors.NotAuthorizedError
 
     def update_features(self, code: str, features: dict):
         """
