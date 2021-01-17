@@ -8,8 +8,7 @@ class Item:
     features: Dict[str, Any]
     product: Product
     contents: List[Any]  # Other Item objects, actually
-    location: List[Any]  # TODO: is it a path (place1/place2/place3) or just a string?
-    path: List[str]
+    location: List[Any]
 
     def __init__(self, data: dict = None):
         """
@@ -18,10 +17,10 @@ class Item:
         """
         self.code = None
         self.features = {}
-        self.product = None #TODO: can't find a reference on the wiki
+        self.product = None
+        # http://localhost:8080/v2/items/R777?separate
         self.contents = list()
-        self.location = None
-        self.path = [] #TODO: merge with location
+        self.location = list()
 
         if data is not None:
             # setup path and location
@@ -32,15 +31,17 @@ class Item:
             if data.get('code') is not None:
                 self.code = data['code']
 
+            if data.get('product') is not None:
+                self.product = Product(data['product'])
+
             for k, v in data['features'].items():
                 # setattr(self, k, v)
                 self.features[k] = v
 
-            self.path = data.get('location') #TODO: remove, no location in the JSON wiki
-            if self.path is not None and len(self.path) >= 1:
-                self.location = self.path[-1]
+            if data.get('location') is not None:
+                self.location = data['location']
 
-            # load the eventual content of the item from data
+            # load the eventual list of items (content) of the item from data
             if data.get('contents') is not None:
                 self.set_contents(data.get('contents'))
 
@@ -55,7 +56,7 @@ class Item:
             result['code'] = self.code
 
         if self.location is not None:
-            result['parent'] = self.location
+            result['location'] = self.location
 
         result['features'] = self.features
         if len(self.contents) > 0:
@@ -71,8 +72,10 @@ class Item:
     def add_content(self, item: Any):
         self.contents.append(Item(item))
 
-    def set_location(self, location: str):
+    def set_location(self, location: list):
         self.location = location
+
+
 
     def __str__(self):
         s = str(self.features)

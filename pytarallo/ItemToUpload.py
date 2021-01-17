@@ -11,6 +11,7 @@ class ItemToUpload(Item):
         super().__init__(data)
 
         if data.get("parent") is not None:
+            # TODO: parent = location[-1]
             self.parent = data["parent"]
 
     def set_contents(self, contents: dict = None):

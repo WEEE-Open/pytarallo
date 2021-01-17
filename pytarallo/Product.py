@@ -16,10 +16,16 @@ class Product:
         self.features = {}
 
         if data is not None:
-            self.brand = data['brand']
-            self.model = data['model']
-            self.variant = data['variant']
-            self.features = data['features']
+            if data.get('brand') is not None:
+                self.brand = data['brand']
+            if data.get('model') is not None:
+                self.model = data['model']
+            if data.get('variant') is not None:
+                self.variant = data['variant']
+            if data.get('features') is not None:
+                self.features = data['features']
+            else:
+                self.features = {}
 
     def serializable(self):
         """JSON representation
@@ -34,11 +40,11 @@ class Product:
         result = {}
         if self.brand is not None:
             result['brand'] = self.brand
-        elif self.model is not None:
+        if self.model is not None:
             result['model'] = self.model
-        elif self.variant is not None:
+        if self.variant is not None:
             result['variant'] = self.variant
-        elif self.features is not None:
+        if self.features is not None:
             result['features'] = self.features
 
         return result

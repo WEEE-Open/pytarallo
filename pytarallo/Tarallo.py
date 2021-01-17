@@ -10,7 +10,6 @@ from pytarallo import ProductToUpload, ItemToUpload
 from pytarallo.AuditEntry import AuditEntry, AuditChanges
 from pytarallo.Item import Item
 
-# from pytarallo.pytarallo.Errors import *
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
@@ -107,7 +106,7 @@ class Tarallo(object):
             return self.response.status_code
 
     def get_item(self, code, depth_limit=None):
-        """This method returns an Item instance recieved from the server"""
+        """This method returns an Item instance received from the server"""
         url = '/v2/items/' + self.urlencode(code) + '?separate' # try an Item without product6
         if depth_limit is not None:
             url += '?depth=' + str(int(depth_limit))
@@ -118,43 +117,37 @@ class Tarallo(object):
         elif self.response.status_code == 404:
             raise Errors.ItemNotFoundError(f"Item {code} doesn't exist")
 
-    def get_product_list(self, brand, model, variant):
+    def get_product_list(self, brand, model):
         """returns an list of Product retrieved from the server
-
         Args:
             self, brand: str, model: str, variant: str
-
         Returns:
-            Product
+            list of Products
         """
-        # TODO:  tests
-
-        url = '/v2/products/' + brand + model + variant
+        url = '/v2/products/' + brand + '/' + model
         self.get(url)
         if self.response.status_code == 200:
             res = json.loads(self.response.content)
             product_list = []
             for p in res:
                 product_list.append(Product(p))
-                return product_list
+            return product_list
         elif self.response.status_code == 404:
             raise Errors.ProductNotFoundError("Product doesn't exists.")
 
-    def get_product(self, brand, model):
+    def get_product(self, brand, model, variant):
         """Retrieve a product from the server
-
         Args:
             self
-
         Returns:
-            lsit of Product
+            Product
         """
-        # TODO: tests
-        url = '/v2/products/' + brand + model
+        url = '/v2/products/' + brand + '/' + model + '/' + variant
         self.get(url)
         if self.response.status_code == 200:
             res = json.loads(self.response.content)
             p = Product(res)
+            return p
         elif self.response.status_code == 404:
             raise Errors.ProductNotFoundError("Product doesn't exists.")
 
@@ -168,10 +161,8 @@ class Tarallo(object):
         else:
             self.post(['/v2/items/'], data=json.dumps(item.serializable()))
             added_item_status = self.response.status_code
-
         if added_item_status == 201:
             item.code = json.loads(self.response.content)
-            item.location = None
             return True
         elif added_item_status == 400 or added_item_status == 404:
             raise Errors.ValidationError
@@ -179,15 +170,12 @@ class Tarallo(object):
             raise Errors.NotAuthorizedError
 
     def add_product(self, product: ProductToUpload):
-        """adds a product to the database or updates its code
-
+        """adds a product to the database
         Args:
             self, product: ProductToUpload
-
         Returns:
-            True if success, Errors exeptions otherwise
+            True if success, Errors exceptions otherwise
         """
-        # TODO: tests
         self.put([f'/v2/products/{product.brand}/{product.model}/{product.variant}'],
                  data=json.dumps(product.serializable()))
         added_product_status = self.response.status_code
@@ -198,7 +186,8 @@ class Tarallo(object):
         elif added_product_status == 403:
             raise Errors.NotAuthorizedError
 
-    def update_features(self, code: str, features: dict):
+    def update_item_features(self, code: str, features: dict):
+        # TODO: add the update feature for the products, 2 functions?
         """
         Send updated features to the database (this is the PATCH endpoint)
         """
@@ -210,6 +199,17 @@ class Tarallo(object):
             raise Errors.ValidationError("Impossible to update feature/s")
         elif self.response.status_code == 404:
             raise Errors.ItemNotFoundError(f"Item {code} doesn't exist")
+
+    def update_product_features(self, brand, model, variant, features: dict):
+        # TODO: tests
+        url = f"/v2/products/{brand}/{model}/{variant}/features"
+        self.patch(url, json.dumps(features))
+        if self.response.status_code == 200 or self.response.status_code == 204:
+            return True
+        elif self.response.status_code == 400:
+            raise Errors.ValidationError("Impossible to update feature/s")
+        elif self.response.status_code == 404:
+            raise Errors.ProductNotFoundError(f"Product doesn't exist")
 
     def move(self, code, location):
         """
@@ -231,6 +231,27 @@ class Tarallo(object):
                 raise Errors.ItemNotFoundError(f"Item {response_json['item']} doesn't exist")
         else:
             raise RuntimeError(f"Move failed with {move_status}")
+
+    def delete_product(self, brand, model, variant):
+        """ send a DELETE request to the server to remove a product
+        
+        Args:
+            self, brand, model, variant
+           
+        Returns:
+            /
+        """
+        delete_status = self.delete(
+            [f"v2/products/{brand}/{model}/{variant}"]
+        )
+        if delete_status == 200:
+            # Actually deleted
+            return True
+        if delete_status == 404:
+            return None
+        else:
+            return False
+
 
     def remove_item(self, code):
         """
