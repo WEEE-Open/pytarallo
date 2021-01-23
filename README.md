@@ -23,14 +23,14 @@ Create a file named `.env` (a dot followed by the word "env") with this content:
 
 ```shell script
 export TARALLO_URL=http://127.0.0.1:8080
-export TARALLO_TOKEN=4qzgVAOo_U15EodQ6kukgQ==:6eAT52MyNMkqPVi9sCHeoIphNrdI0yWI2tngJxQLLI8=
+export TARALLO_TOKEN=yoLeCHmEhNNseN0BlG0s3A:ksfPYziGg7ebj0goT0Zc7pbmQEIYvZpRTIkwuscAM_k
 ```
 
-The token is just an example, you need to generate one in T.A.R.A.L.L.O. obviously.
+Or, as an alternative, you can add these lines to PyCharm (or whatever other IDE you're using) configuration for the test script launcher, they are just environment variables.
 
-Or, as an alternative, you can add these lines at the end of `venv/bin/activate`. Or you can add them to PyCharm (or whatever other IDE you're using) configuration for the test script launcher.
+The token is the default one for the dev enviroment (see [T.A.R.A.L.L.O. developement](https://github.com/WEEE-Open/tarallo#developement), but you can generate different ones from T.A.R.A.L.L.O. obviously.
 
-Activate the virtualenv
+Then activate the virtualenv:
 
 ```shell script
 source venv/bin/activate
@@ -38,7 +38,7 @@ source venv/bin/activate
 
 ### 3. Dependecies
 
-Install depencies for developement
+Install dependencies for developement
 
 ```shell script
 pip install -e ".[dev]"
