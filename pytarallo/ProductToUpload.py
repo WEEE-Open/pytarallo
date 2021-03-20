@@ -10,10 +10,6 @@ class ProductToUpload(Product):
         if not self.variant:
             self.variant = 'default'
 
-    # TODO: test
-    def add_feature(self, key: str, value: Any):
-        self.features[key] = value
-
     def serializable(self) -> dict:
         # Brand, model, variant are part of the URL
         result = {

@@ -95,9 +95,7 @@ def test_move_item():
     assert tarallo_session.move("R111", 'schifomacchina')
 
 
-def test_add_products():
-    # delete product
-    # variant timestamp o number casuale
+def test_add_remove_products():
     tarallo_session = Tarallo(t_url, t_token)
     data = {
         "brand": "testBrand",
@@ -105,9 +103,28 @@ def test_add_products():
         "variant": "testVariant",
         "features": {"psu-volt": 19}
     }
-    tarallo_session.delete_product(data.get("brand"), data.get("model"), data.get("variant"))
+    deleted = tarallo_session.delete_product(data.get("brand"), data.get("model"), data.get("variant"))
+    assert deleted or deleted is None
     p = ProductToUpload(data)
-    assert tarallo_session.add_product(p)  # raises ValidationError ??
+    assert tarallo_session.add_product(p)
+
+
+@raises(ValidationError)
+def test_add_duplicate_products():
+    tarallo_session = Tarallo(t_url, t_token)
+    data = {
+        "brand": "testBrand",
+        "model": "testModel",
+        "variant": "testVariant",
+        "features": {"psu-volt": 12}
+    }
+    p = ProductToUpload(data)
+    # Remove and add
+    deleted = tarallo_session.delete_product(data.get("brand"), data.get("model"), data.get("variant"))
+    assert deleted or deleted is None
+    assert tarallo_session.add_product(p)
+    # This one fails
+    tarallo_session.add_product(p)
 
 
 def test_get_product():
@@ -159,14 +176,38 @@ def test_move_item_impossible():
     assert tarallo_session.move("R200", "C1")
 
 
-def test_update_p_feature():
+def test_update_product_feature():
     tarallo_session = Tarallo(t_url, t_token)
     p = tarallo_session.get_product('AMD', 'Opteron 3300', 'AJEJE')
-    new_features = p.features
-    new_features['type'] = 'ram'
+    assert p.features['type'] == 'cpu'
+    if 'color' in p.features and p.features['color'] == 'red':
+        new_features = {"color": "grey"}
+    else:
+        new_features = {"color": "red"}
+
+    tarallo_session.update_product_features('AMD', 'Opteron 3300', 'AJEJE', new_features)
+
+    p = tarallo_session.get_product('AMD', 'Opteron 3300', 'AJEJE')
+    assert p.features["type"] == 'cpu'
+    assert p.features["color"] == new_features["color"]
+
+
+def test_delete_product_feature():
+    tarallo_session = Tarallo(t_url, t_token)
+    p = tarallo_session.get_product('AMD', 'Opteron 3300', 'AJEJE')
+    assert p.features['type'] == 'cpu'
+    # Add feature if missing
+    if 'color' not in p.features and p.features['color'] == 'red':
+        new_features = {"color": "grey"}
+        tarallo_session.update_product_features('AMD', 'Opteron 3300', 'AJEJE', new_features)
+        p = tarallo_session.get_product('AMD', 'Opteron 3300', 'AJEJE')
+    assert "color" in p.features
+
+    new_features = {"color": None}
     tarallo_session.update_product_features('AMD', 'Opteron 3300', 'AJEJE', new_features)
     p = tarallo_session.get_product('AMD', 'Opteron 3300', 'AJEJE')
-    assert p.features["type"] == 'ram'
+    assert p.features["type"] == 'cpu'
+    assert "color" not in p.features
 
 
 def test_update_one_feature():

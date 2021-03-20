@@ -27,13 +27,8 @@ class Tarallo(object):
         self.__session = requests.Session()
         self.response = None
 
-    def __prepare_url(self, url):
-        if isinstance(url, str):
-            url = '/' + url.lstrip('/')
-        else:
-            # Best library to join url components: this thing.
-            url = '/' + '/'.join(s.strip('/') for s in url)
-        return self.url + url
+    def __prepare_url(self, url: str) -> str:
+        return self.url + '/' + url.lstrip('/')
 
     def __check_response(self):
         if self.response.status_code == 401:
@@ -43,7 +38,7 @@ class Tarallo(object):
 
     # requests.Session() wrapper methods
     # These guys implement further checks
-    def get(self, url) -> requests.Response:
+    def get(self, url: str) -> requests.Response:
         url = self.__prepare_url(url)
         headers = {"Authorization": "Token " + self.token}
         # cookies={"XDEBUG_SESSION": "PHPSTORM"}
@@ -51,14 +46,14 @@ class Tarallo(object):
         self.__check_response()
         return self.response
 
-    def delete(self, url) -> requests.Response:
+    def delete(self, url: str) -> requests.Response:
         url = self.__prepare_url(url)
         headers = {"Authorization": "Token " + self.token}
         self.response = self.__session.delete(url, headers=headers)
         self.__check_response()
         return self.response
 
-    def post(self, url, data, headers=None) -> requests.Response:
+    def post(self, url: str, data, headers=None) -> requests.Response:
         if headers is None:
             headers = {}
         if "Content-Type" not in headers:
@@ -69,7 +64,7 @@ class Tarallo(object):
         self.__check_response()
         return self.response
 
-    def put(self, url, data, headers=None) -> requests.Response:
+    def put(self, url: str, data, headers=None) -> requests.Response:
         if headers is None:
             headers = {}
         if "Content-Type" not in headers:
@@ -80,7 +75,7 @@ class Tarallo(object):
         self.__check_response()
         return self.response
 
-    def patch(self, url, data, headers=None) -> requests.Response:
+    def patch(self, url: str, data, headers=None) -> requests.Response:
         if headers is None:
             headers = {}
         if "Content-Type" not in headers:
@@ -157,11 +152,10 @@ class Tarallo(object):
         """Add an item to the database and eventually update its code
             """
         if item.code is not None:  # check whether an item's code was manually added
-            self.put([f'/v2/items/{item.code}'],
-                     data=json.dumps(item.serializable()))
+            self.put(f'/v2/items/{self.urlencode(item.code)}', data=json.dumps(item.serializable()))
             added_item_status = self.response.status_code
         else:
-            self.post(['/v2/items/'], data=json.dumps(item.serializable()))
+            self.post('/v2/items', data=json.dumps(item.serializable()))
             added_item_status = self.response.status_code
         if added_item_status == 201:
             item.code = json.loads(self.response.content)
@@ -178,7 +172,8 @@ class Tarallo(object):
         Returns:
             True if success, Errors exceptions otherwise
         """
-        self.put([f'/v2/products/{product.brand}/{product.model}/{product.variant}'],
+        bmv = f"{self.urlencode(product.brand)}/{self.urlencode(product.model)}/{self.urlencode(product.variant)}"
+        self.put(f'/v2/products/{bmv}',
                  data=json.dumps(product.serializable()))
         added_product_status = self.response.status_code
         if added_product_status == 201:
@@ -189,12 +184,10 @@ class Tarallo(object):
             raise NotAuthorizedError
 
     def update_item_features(self, code: str, features: dict):
-        # TODO: add the update feature for the products, 2 functions?
         """
         Send updated features to the database (this is the PATCH endpoint)
         """
-        self.patch(['/v2/items/', self.urlencode(code),
-                    '/features'], json.dumps(features))
+        self.patch(f'/v2/items/{self.urlencode(code)}/features', json.dumps(features))
         if self.response.status_code == 200 or self.response.status_code == 204:
             return True
         elif self.response.status_code == 400:
@@ -203,8 +196,8 @@ class Tarallo(object):
             raise ItemNotFoundError(f"Item {code} doesn't exist")
 
     def update_product_features(self, brand, model, variant, features: dict):
-        # TODO: tests
-        url = f"/v2/products/{brand}/{model}/{variant}/features"
+        bmv = f"{self.urlencode(brand)}/{self.urlencode(model)}/{self.urlencode(variant)}"
+        url = f"/v2/products/{bmv}/features"
         self.patch(url, json.dumps(features))
         if self.response.status_code == 200 or self.response.status_code == 204:
             return True
@@ -217,8 +210,7 @@ class Tarallo(object):
         """
         Move an item to another location
         """
-        move_status = self.put(
-            ['v2/items/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
+        move_status = self.put(f'v2/items/{self.urlencode(code)}/parent', json.dumps(location)).status_code
         if move_status == 204 or move_status == 201:
             return True
         elif move_status == 400:
@@ -235,18 +227,12 @@ class Tarallo(object):
             raise RuntimeError(f"Move failed with {move_status}")
 
     def delete_product(self, brand, model, variant):
-        """ send a DELETE request to the server to remove a product
-        
-        Args:
-            self, brand, model, variant
-           
-        Returns:
-            /
         """
-        delete_status = self.delete(
-            [f"v2/products/{brand}/{model}/{variant}"]
-        )
-        if delete_status == 200:
+        send a DELETE request to the server to remove a product
+        """
+        bmv = f"{self.urlencode(brand)}/{self.urlencode(model)}/{self.urlencode(variant)}"
+        delete_status = self.delete(f"v2/products/{bmv}").status_code
+        if delete_status == 200 or delete_status == 204:
             # Actually deleted
             return True
         if delete_status == 404:
@@ -261,8 +247,8 @@ class Tarallo(object):
         :return: True if successful deletion
                  False if deletion failed
         """
-        item_status = self.delete(['/v2/items/', self.urlencode(code)]).status_code
-        deleted_status = self.get(['/v2/deleted/', self.urlencode(code)]).status_code
+        item_status = self.delete(f'/v2/items/{self.urlencode(code)}').status_code
+        deleted_status = self.get(f'/v2/deleted/{self.urlencode(code)}').status_code
         if deleted_status == 200:
             # Actually deleted
             return True
@@ -279,7 +265,7 @@ class Tarallo(object):
         :return: True if item successfully restored
                  False if failed to restore
         """
-        item_status = self.put(['/v2/deleted/', self.urlencode(code), '/parent'], json.dumps(location)).status_code
+        item_status = self.put(f'/v2/deleted/{self.urlencode(code)}/parent', json.dumps(location)).status_code
         if item_status == 201:
             return True
         else:
