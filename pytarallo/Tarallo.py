@@ -1,15 +1,15 @@
 import json
 import urllib.parse
-import pytarallo.Errors as Errors
 from typing import Optional
-from pytarallo.Product import Product
 
 import requests
 
-from pytarallo import ProductToUpload, ItemToUpload
-from pytarallo.AuditEntry import AuditEntry, AuditChanges
-from pytarallo.Item import Item
-
+from .Product import Product
+from .ProductToUpload import ProductToUpload
+from .Item import Item
+from .ItemToUpload import ItemToUpload
+from .AuditEntry import AuditEntry, AuditChanges
+from .Errors import *
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
@@ -19,7 +19,6 @@ class Tarallo(object):
 
     def __init__(self, url: str, token: str):
         """
-
         :param url: Tarallo URL
         :param token: Token (go to Options > Get token)
         """
@@ -38,15 +37,16 @@ class Tarallo(object):
 
     def __check_response(self):
         if self.response.status_code == 401:
-            raise Errors.AuthenticationError
+            raise AuthenticationError
         if self.response.status_code not in VALID_RESPONSES:
-            raise Errors.ServerError
+            raise ServerError
 
     # requests.Session() wrapper methods
     # These guys implement further checks
     def get(self, url) -> requests.Response:
         url = self.__prepare_url(url)
         headers = {"Authorization": "Token " + self.token}
+        # cookies={"XDEBUG_SESSION": "PHPSTORM"}
         self.response = self.__session.get(url, headers=headers)
         self.__check_response()
         return self.response
@@ -86,7 +86,6 @@ class Tarallo(object):
         if "Content-Type" not in headers:
             headers["Content-Type"] = "application/json"
         headers["Authorization"] = "Token " + self.token
-        # , cookies={"XDEBUG_SESSION": "PHPSTORM"}
         url = self.__prepare_url(url)
         self.response = self.__session.patch(url, data=data, headers=headers)
         self.__check_response()
@@ -102,12 +101,12 @@ class Tarallo(object):
         """
         try:
             return self.get('/v2/session').status_code
-        except Errors.AuthenticationError:
+        except AuthenticationError:
             return self.response.status_code
 
     def get_item(self, code, depth_limit=None):
         """This method returns an Item instance received from the server"""
-        url = '/v2/items/' + self.urlencode(code) + '?separate' # try an Item without product6
+        url = '/v2/items/' + self.urlencode(code) + '?separate'  # try an Item without product6
         if depth_limit is not None:
             url += '?depth=' + str(int(depth_limit))
         self.get(url)
@@ -115,7 +114,7 @@ class Tarallo(object):
             item = Item(json.loads(self.response.content))
             return item
         elif self.response.status_code == 404:
-            raise Errors.ItemNotFoundError(f"Item {code} doesn't exist")
+            raise ItemNotFoundError(f"Item {code} doesn't exist")
 
     def get_product_list(self, brand, model):
         """returns an list of Product retrieved from the server
@@ -133,14 +132,15 @@ class Tarallo(object):
                 product_list.append(Product(p))
             return product_list
         elif self.response.status_code == 404:
-            raise Errors.ProductNotFoundError("Product doesn't exists.")
+            raise ProductNotFoundError("Product doesn't exists.")
 
-    def get_product(self, brand, model, variant):
+    def get_product(self, brand, model, variant="default"):
         """Retrieve a product from the server
-        Args:
-            self
-        Returns:
-            Product
+        Returns a Product
+
+        :param variant:
+        :param brand:
+        :param model:
         """
         url = '/v2/products/' + brand + '/' + model + '/' + variant
         self.get(url)
@@ -149,7 +149,7 @@ class Tarallo(object):
             p = Product(res)
             return p
         elif self.response.status_code == 404:
-            raise Errors.ProductNotFoundError("Product doesn't exists.")
+            raise ProductNotFoundError("Product doesn't exists.")
 
     def add_item(self, item: ItemToUpload):
         """Add an item to the database and eventually update its code
@@ -165,9 +165,9 @@ class Tarallo(object):
             item.code = json.loads(self.response.content)
             return True
         elif added_item_status == 400 or added_item_status == 404:
-            raise Errors.ValidationError
+            raise ValidationError
         elif added_item_status == 403:
-            raise Errors.NotAuthorizedError
+            raise NotAuthorizedError
 
     def add_product(self, product: ProductToUpload):
         """adds a product to the database
@@ -182,9 +182,9 @@ class Tarallo(object):
         if added_product_status == 201:
             return True
         elif added_product_status == 400 or added_product_status == 404:
-            raise Errors.ValidationError
+            raise ValidationError
         elif added_product_status == 403:
-            raise Errors.NotAuthorizedError
+            raise NotAuthorizedError
 
     def update_item_features(self, code: str, features: dict):
         # TODO: add the update feature for the products, 2 functions?
@@ -196,9 +196,9 @@ class Tarallo(object):
         if self.response.status_code == 200 or self.response.status_code == 204:
             return True
         elif self.response.status_code == 400:
-            raise Errors.ValidationError("Impossible to update feature/s")
+            raise ValidationError("Impossible to update feature/s")
         elif self.response.status_code == 404:
-            raise Errors.ItemNotFoundError(f"Item {code} doesn't exist")
+            raise ItemNotFoundError(f"Item {code} doesn't exist")
 
     def update_product_features(self, brand, model, variant, features: dict):
         # TODO: tests
@@ -207,9 +207,9 @@ class Tarallo(object):
         if self.response.status_code == 200 or self.response.status_code == 204:
             return True
         elif self.response.status_code == 400:
-            raise Errors.ValidationError("Impossible to update feature/s")
+            raise ValidationError("Impossible to update feature/s")
         elif self.response.status_code == 404:
-            raise Errors.ProductNotFoundError(f"Product doesn't exist")
+            raise ProductNotFoundError(f"Product doesn't exist")
 
     def move(self, code, location):
         """
@@ -220,15 +220,15 @@ class Tarallo(object):
         if move_status == 204 or move_status == 201:
             return True
         elif move_status == 400:
-            raise Errors.ValidationError(f"Cannot move {code} into {location}")
+            raise ValidationError(f"Cannot move {code} into {location}")
         elif move_status == 404:
             response_json = json.loads(self.response.content)
             if 'item' not in response_json:
-                raise Errors.ServerError("Server didn't find an item, but isn't telling us which one")
+                raise ServerError("Server didn't find an item, but isn't telling us which one")
             if response_json['item'] == location:
-                raise Errors.LocationNotFoundError
+                raise LocationNotFoundError
             else:
-                raise Errors.ItemNotFoundError(f"Item {response_json['item']} doesn't exist")
+                raise ItemNotFoundError(f"Item {response_json['item']} doesn't exist")
         else:
             raise RuntimeError(f"Move failed with {move_status}")
 
@@ -251,7 +251,6 @@ class Tarallo(object):
             return None
         else:
             return False
-
 
     def remove_item(self, code):
         """
@@ -309,7 +308,7 @@ class Tarallo(object):
                 result.append(AuditEntry(entry["user"], change, float(entry["time"]), entry["other"]))
             return result
         elif history.status_code == 404:
-            raise Errors.ItemNotFoundError(f"Item {code} doesn\'t exist")
+            raise ItemNotFoundError(f"Item {code} doesn\'t exist")
         else:
             raise RuntimeError("Unexpected return code")
 
@@ -321,6 +320,6 @@ class Tarallo(object):
             return items.json()
         elif items.status_code == 400:
             exception = items.json()
-            raise Errors.ValidationError(exception.get('message', 'No message from the server'))
+            raise ValidationError(exception.get('message', 'No message from the server'))
         else:
             raise RuntimeError("Unexpected return code")

@@ -11,7 +11,6 @@ from pytarallo.ProductToUpload import ProductToUpload
 from pytarallo.Tarallo import Tarallo
 from pytarallo.Errors import ItemNotFoundError, LocationNotFoundError, ValidationError
 
-
 load_dotenv()
 
 try:
@@ -19,6 +18,7 @@ try:
     t_token = env['TARALLO_TOKEN']
 except KeyError:
     raise EnvironmentError("Missing definitions of TARALLO_* environment variables (see README)")
+
 
 def test_invalid_login():
     tarallo_session = Tarallo(t_url, 'invalid')
@@ -107,7 +107,8 @@ def test_add_products():
     }
     tarallo_session.delete_product(data.get("brand"), data.get("model"), data.get("variant"))
     p = ProductToUpload(data)
-    assert tarallo_session.add_product(p) #raises ValidationError ??
+    assert tarallo_session.add_product(p)  # raises ValidationError ??
+
 
 def test_get_product():
     tarallo_session = Tarallo(t_url, t_token)
@@ -118,6 +119,18 @@ def test_get_product():
     assert p.variant == "testVariant"
     assert isinstance(p.features, dict)
 
+
+def test_get_product2():
+    tarallo_session = Tarallo(t_url, t_token)
+    p = tarallo_session.get_product("Samsung", "S667ABC1024", "v1")
+    assert type(p) == Product
+    assert p.brand == "Samsung"
+    assert p.model == "S667ABC1024"
+    assert p.variant == "v1"
+    assert isinstance(p.features, dict)
+    assert len(p.features) > 0
+
+
 def test_get_product_list():
     tarallo_session = Tarallo(t_url, t_token)
     pl = tarallo_session.get_product_list("Samsung", "S667ABC1024")
@@ -125,8 +138,6 @@ def test_get_product_list():
     assert len(pl) == 2
     assert type(pl[0]) == Product
     assert type(pl[1]) == Product
-
-
 
 
 @raises(ItemNotFoundError)
@@ -147,13 +158,14 @@ def test_move_item_impossible():
     # Invalid nesting, cannot place a RAM inside a CPU
     assert tarallo_session.move("R200", "C1")
 
+
 def test_update_p_feature():
     tarallo_session = Tarallo(t_url, t_token)
-    p = tarallo_session.get_product('AMD','Opteron 3300', 'AJEJE')
+    p = tarallo_session.get_product('AMD', 'Opteron 3300', 'AJEJE')
     new_features = p.features
     new_features['type'] = 'ram'
-    tarallo_session.update_product_features('AMD','Opteron 3300', 'AJEJE', new_features)
-    p = tarallo_session.get_product('AMD','Opteron 3300', 'AJEJE')
+    tarallo_session.update_product_features('AMD', 'Opteron 3300', 'AJEJE', new_features)
+    p = tarallo_session.get_product('AMD', 'Opteron 3300', 'AJEJE')
     assert p.features["type"] == 'ram'
 
 
@@ -256,7 +268,6 @@ def test_add_item_cloned():
     cpu_toUpload = ItemToUpload(data)
     assert tarallo_session.add_item(cpu_toUpload)
 
-
     # Let's get the entire item again and check...
     cpu = tarallo_session.get_item(cpu.code)
 
@@ -271,6 +282,7 @@ def test_add_item():
     tarallo_session.add_item(ram)
 
 
+# TODO: why is this so slow?
 def test_travaso():
     tarallo_session = Tarallo(t_url, t_token)
     test_item = tarallo_session.travaso("schifomacchina", "RamBox")

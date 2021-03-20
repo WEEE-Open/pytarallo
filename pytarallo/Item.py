@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any, List
-from pytarallo.Product import Product
+from .Product import Product
 
 
 class Item:

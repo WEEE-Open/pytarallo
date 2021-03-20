@@ -1,5 +1,5 @@
-from pytarallo.Item import Item
-from typing import Optional, Dict, Any, List
+from .Item import Item
+from typing import Optional, Any
 
 
 class ItemToUpload(Item):
