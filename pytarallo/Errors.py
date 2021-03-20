@@ -50,3 +50,10 @@ class ServerError(Exception):
     When the server returns a 500 status.
     """
     pass
+
+
+class InvalidObjectError(Exception):
+    """
+    Object can be an Item, a Product, or other.
+    """
+    pass

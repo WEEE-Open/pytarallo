@@ -1,37 +1,42 @@
-from .Item import Item
 from typing import Optional, Any
 
+from .Errors import InvalidObjectError
+from .Item import Item
+from .ItemBase import ItemBase
 
-class ItemToUpload(Item):
-    """Item not existing on the server"""
+
+class ItemToUpload(ItemBase):
+    """
+    Item not existing on the server
+    """
     parent: Optional[str]
 
-    def __init__(self, data: dict = None):
-        """Constructor for ItemToUpload"""
-        super().__init__(data)
+    def __init__(self, item: Optional[Item] = None):
+        super().__init__()
 
-        if data.get("parent") is not None:
-            # TODO: parent = location[-1]
-            self.parent = data["parent"]
+        if item:
+            if not isinstance(item, Item):
+                raise TypeError("ItemToUpload takes an Item to clone, or None if you want to build a new item")
+            self.code = item.code
+            self.features = item.features
+            for inner_item_data in item.contents:
+                self.add_content(ItemToUpload(inner_item_data))
+            if len(item.location) > 0:
+                self.parent = item.location[-1]
 
-    def set_contents(self, contents: dict = None):
-        """setter for the contents"""
-        for inner_item_data in contents:
-            self.contents.append(ItemToUpload(inner_item_data))
+    def add_content(self, item):
+        if not isinstance(item, ItemToUpload):
+            raise InvalidObjectError("ItemToUpload can only contain another ItemToUpload")
+        self.contents.append(item)
 
+    def set_parent(self, parent: Optional[str]):
+        self.parent = parent
 
-    def serializable(self):
-        result = {}
+    def serializable(self) -> dict:
+        result = super().serializable()
         if self.parent is not None:
             result['parent'] = self.parent
-
-        result['features'] = self.features
-        if len(self.contents) > 0:
-            result['contents'] = []
-            for item in self.contents:
-                # Yay for recursion!
-                result['contents'].append(item.serializable())
         return result
 
-    def add_content(self, item: Any):
-        self.contents.append(ItemToUpload(item))
+    def set_code(self, code: Optional[str]):
+        self.code = code

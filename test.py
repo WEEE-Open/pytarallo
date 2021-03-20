@@ -173,7 +173,7 @@ def test_update_one_feature():
     tarallo_session = Tarallo(t_url, t_token)
     work = tarallo_session.get_item('R777').features['working']
 
-    new_feat = 'yes'
+    new_feat = 'yes' if work != 'yes' else 'no'
 
     # If operation succeeds, return True
     assert tarallo_session.update_item_features('R777', {'working': new_feat})
@@ -250,35 +250,44 @@ def test_add_item():
 
 def test_add_item_cloned():
     tarallo_session = Tarallo(t_url, t_token)
-    cpu = tarallo_session.get_item("C1")
+    cpu = tarallo_session.get_item("C100TEST")
     assert cpu is not None
-    # it comes from a computer, path will still contain that, I don't care: I want it on the Table.
+
+    cpu_to_upload = ItemToUpload(cpu)
+    assert cpu.code == cpu_to_upload.code
+    assert cpu.location[-1] == cpu_to_upload.parent
+    assert len(cpu.features) == len(cpu_to_upload.features)
+
+    # It comes from a computer, path will still contain that, I don't care: I want it on the Table.
     # Send this location to the server, not the path.
+    cpu_to_upload.set_parent("Table")
+    assert cpu.location[-1] != cpu_to_upload.parent
+
     # Let the server generate another code (since there's no way to delete items permanently we
     # can't test manually assigned codes... or rather we can, but just once)
-    # Add it: should succeed
+    cpu_to_upload.set_code(None)
+    assert cpu.code != cpu_to_upload.code
 
-    # the following lines convert a Item -> ItemToUpload
-    # and test some basic stuff
-    data = cpu.serializable()
-    del data["code"]
-    data["parent"] = data.get("location")[-1]
-    del data["location"]
-    assert data["parent"] == 'Table'
-    cpu_toUpload = ItemToUpload(data)
-    assert tarallo_session.add_item(cpu_toUpload)
+    # Add it: should succeed
+    assert tarallo_session.add_item(cpu_to_upload)
 
     # Let's get the entire item again and check...
-    cpu = tarallo_session.get_item(cpu.code)
+    # The generated code was added to the original dict
+    cpu_cloned = tarallo_session.get_item(cpu_to_upload.code)
+
+    assert cpu_cloned.code != cpu.code
+    assert cpu_cloned.location[-1] == cpu_to_upload.parent
+    assert len(cpu_cloned.features) == len(cpu_to_upload.features)
 
 
 @raises(ValidationError)
 def test_add_item():
     tarallo_session = Tarallo(t_url, t_token)
-    data = {'code': "!N\\/@L!D",
-            'features': {'type': 'ram'},
-            'parent': 'Table'}
-    ram = ItemToUpload(data)
+
+    ram = ItemToUpload()
+    ram.set_code("!N\\/@L!D")
+    ram.set_parent("Table")
+    ram.features = {'type': 'ram'}
     tarallo_session.add_item(ram)
 
 

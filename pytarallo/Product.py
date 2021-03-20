@@ -16,3 +16,12 @@ class Product:
         self.model = data.get('model')
         self.variant = data.get('variant')
         self.features = data.get('features')
+
+    def serializable(self) -> dict:
+        result = {
+            'brand': self.brand,
+            'model': self.model,
+            'variant': self.variant,
+            'features': self.features,
+        }
+        return result

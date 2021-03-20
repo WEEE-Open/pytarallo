@@ -4,12 +4,12 @@ from typing import Optional
 
 import requests
 
-from .Product import Product
-from .ProductToUpload import ProductToUpload
-from .Item import Item
-from .ItemToUpload import ItemToUpload
 from .AuditEntry import AuditEntry, AuditChanges
 from .Errors import *
+from .Item import Item
+from .ItemToUpload import ItemToUpload
+from .Product import Product
+from .ProductToUpload import ProductToUpload
 
 VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
 
@@ -105,8 +105,10 @@ class Tarallo(object):
             return self.response.status_code
 
     def get_item(self, code, depth_limit=None):
-        """This method returns an Item instance received from the server"""
-        url = '/v2/items/' + self.urlencode(code) + '?separate'  # try an Item without product6
+        """
+        Return an Item instance received from the server
+        """
+        url = f'/v2/items/{self.urlencode(code)}?separate'  # try an Item without product
         if depth_limit is not None:
             url += '?depth=' + str(int(depth_limit))
         self.get(url)
@@ -123,7 +125,7 @@ class Tarallo(object):
         Returns:
             list of Products
         """
-        url = '/v2/products/' + brand + '/' + model
+        url = f'/v2/products/{self.urlencode(brand)}/{self.urlencode(model)}'
         self.get(url)
         if self.response.status_code == 200:
             res = json.loads(self.response.content)
@@ -142,7 +144,7 @@ class Tarallo(object):
         :param brand:
         :param model:
         """
-        url = '/v2/products/' + brand + '/' + model + '/' + variant
+        url = f'/v2/products/{self.urlencode(brand)}/{self.urlencode(model)}/{self.urlencode(variant)}'
         self.get(url)
         if self.response.status_code == 200:
             res = json.loads(self.response.content)

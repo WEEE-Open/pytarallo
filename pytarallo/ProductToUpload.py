@@ -15,19 +15,8 @@ class ProductToUpload(Product):
         self.features[key] = value
 
     def serializable(self) -> dict:
-        """
-        JSON representation
-
-        :return: a dict for the JSON repr
-        """
-        result = {}
-        if self.brand:
-            result['brand'] = self.brand
-        if self.model:
-            result['model'] = self.model
-        if self.variant:
-            result['variant'] = self.variant
-        if self.features:
-            result['features'] = self.features
-
+        # Brand, model, variant are part of the URL
+        result = {
+            'features': self.features,
+        }
         return result
