@@ -4,6 +4,9 @@ class ItemNotFoundError(Exception):
     def __init__(self, code):
         self.code = code
 
+class ProductNotFoundError(Exception):
+    def __init__(self, code):
+        self.code = code
 
 class LocationNotFoundError(Exception):
     """

@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 
 from pytarallo.AuditEntry import AuditEntry
 from pytarallo.Item import Item
+from pytarallo.ItemToUpload import ItemToUpload
+from pytarallo.Product import Product
+from pytarallo.ProductToUpload import ProductToUpload
 from pytarallo.Tarallo import Tarallo
 from pytarallo.Errors import ItemNotFoundError, LocationNotFoundError, ValidationError
 
@@ -40,11 +43,9 @@ def test_get_item():
     assert type(item) == Item
     assert item.code == 'SCHIFOMACCHINA'
     assert isinstance(item.features, dict)
-    assert item.features["type"] == "case"
-    assert item.path[0] == "Polito"
-    assert item.path[1] == "Chernobyl"
-    assert item.path[2] == "Table"
-    assert item.location == "Table"
+    assert isinstance(item.product, Product)
+    assert item.product.features["type"] == "case"
+    assert item.location == ["Polito", "Chernobyl", "Table"]
 
 
 def test_get_item_history():
@@ -94,6 +95,40 @@ def test_move_item():
     assert tarallo_session.move("R111", 'schifomacchina')
 
 
+def test_add_products():
+    # delete product
+    # variant timestamp o number casuale
+    tarallo_session = Tarallo(t_url, t_token)
+    data = {
+        "brand": "testBrand",
+        "model": "testModel",
+        "variant": "testVariant",
+        "features": {"psu-volt": 19}
+    }
+    tarallo_session.delete_product(data.get("brand"), data.get("model"), data.get("variant"))
+    p = ProductToUpload(data)
+    assert tarallo_session.add_product(p) #raises ValidationError ??
+
+def test_get_product():
+    tarallo_session = Tarallo(t_url, t_token)
+    p = tarallo_session.get_product("testBrand", "testModel", "testVariant")
+    assert type(p) == Product
+    assert p.brand == "testBrand"
+    assert p.model == "testModel"
+    assert p.variant == "testVariant"
+    assert isinstance(p.features, dict)
+
+def test_get_product_list():
+    tarallo_session = Tarallo(t_url, t_token)
+    pl = tarallo_session.get_product_list("Samsung", "S667ABC1024")
+    assert isinstance(pl, list)
+    assert len(pl) == 2
+    assert type(pl[0]) == Product
+    assert type(pl[1]) == Product
+
+
+
+
 @raises(ItemNotFoundError)
 def test_move_item_not_existing():
     tarallo_session = Tarallo(t_url, t_token)
@@ -112,73 +147,80 @@ def test_move_item_impossible():
     # Invalid nesting, cannot place a RAM inside a CPU
     assert tarallo_session.move("R200", "C1")
 
+def test_update_p_feature():
+    tarallo_session = Tarallo(t_url, t_token)
+    p = tarallo_session.get_product('AMD','Opteron 3300', 'AJEJE')
+    new_features = p.features
+    new_features['type'] = 'ram'
+    tarallo_session.update_product_features('AMD','Opteron 3300', 'AJEJE', new_features)
+    p = tarallo_session.get_product('AMD','Opteron 3300', 'AJEJE')
+    assert p.features["type"] == 'ram'
+
 
 def test_update_one_feature():
     tarallo_session = Tarallo(t_url, t_token)
-    freq = tarallo_session.get_item('R777').features['frequency-hertz']
-    
-    if freq % 2 == 0:
-        new_freq = freq + 1
-    else:
-        new_freq = freq - 1
+    work = tarallo_session.get_item('R777').features['working']
+
+    new_feat = 'yes'
+
     # If operation succeeds, return True
-    assert tarallo_session.update_features('R777', {'frequency-hertz': new_freq})
-    freq_updated = tarallo_session.get_item('R777').features['frequency-hertz']
-    assert freq_updated == new_freq
+    assert tarallo_session.update_item_features('R777', {'working': new_feat})
+    freq_updated = tarallo_session.get_item('R777').features['working']
+    assert freq_updated == new_feat
 
 
 def test_delete_one_feature():
     tarallo_session = Tarallo(t_url, t_token)
     # Insert a frequency
-    assert tarallo_session.update_features('R70', {'frequency-hertz': 800000000})
+    assert tarallo_session.update_item_features('R70', {'frequency-hertz': 800000000})
 
     # Remove it
-    assert tarallo_session.update_features('R70', {'frequency-hertz': None})
+    assert tarallo_session.update_item_features('R70', {'frequency-hertz': None})
 
     # Check that it's gone
     assert 'frequency-hertz' not in tarallo_session.get_item('R70').features
 
     # Add it again
-    assert tarallo_session.update_features('R70', {'frequency-hertz': 800000000})
+    assert tarallo_session.update_item_features('R70', {'frequency-hertz': 800000000})
 
 
 @raises(ValidationError)
 def test_impossible_update():
     tarallo_session = Tarallo(t_url, t_token)
-    tarallo_session.update_features('R198', {'color': 'impossible'})
+    tarallo_session.update_item_features('R198', {'color': 'impossible'})
 
 
 @raises(ValidationError)
 def test_impossible_update_no_such_feature():
     tarallo_session = Tarallo(t_url, t_token)
-    tarallo_session.update_features('R198', {'nonexistent': 'foo'})
+    tarallo_session.update_item_features('R198', {'nonexistent': 'foo'})
 
 
 @raises(ValidationError)
 def test_empty_update():
     tarallo_session = Tarallo(t_url, t_token)
-    tarallo_session.update_features('R189', {})
+    tarallo_session.update_item_features('R189', {})
 
 
 @raises(ItemNotFoundError)
 def test_update_item_not_found():
     tarallo_session = Tarallo(t_url, t_token)
-    tarallo_session.update_features('NONEXISTENT', {'color': 'red'})
+    tarallo_session.update_item_features('NONEXISTENT', {'color': 'red'})
 
 
 @raises(ItemNotFoundError)
 def test_update_item_not_found_2():
     tarallo_session = Tarallo(t_url, t_token)
-    tarallo_session.update_features('NONEXISTANT', {'color': None})
+    tarallo_session.update_item_features('NONEXISTANT', {'color': None})
 
 
 def test_add_item():
     tarallo_session = Tarallo(t_url, t_token)
-    ram = Item()
+    ram = ItemToUpload()
     ram.features["type"] = "ram"
     ram.features["color"] = "red"
     ram.features["capacity-byte"] = 1024 * 1024 * 512  # 512 MiB
-    ram.location = "Table"
+    ram.parent = "Table"
 
     assert tarallo_session.add_item(ram)
 
@@ -188,7 +230,6 @@ def test_add_item():
 
     # Let's get it again and check...
     ram = tarallo_session.get_item(ram.code)
-    assert ram.path[-1:] == ['Table']
     assert ram.location == 'Table'
     assert ram.features["type"] == "ram"
     assert ram.features["color"] == "red"
@@ -201,41 +242,32 @@ def test_add_item_cloned():
     assert cpu is not None
     # it comes from a computer, path will still contain that, I don't care: I want it on the Table.
     # Send this location to the server, not the path.
-    cpu.parent = "Table"
     # Let the server generate another code (since there's no way to delete items permanently we
     # can't test manually assigned codes... or rather we can, but just once)
-    cpu.code = None
     # Add it: should succeed
-    assert tarallo_session.add_item(cpu)
 
-    # This stuff should be updated
-    assert cpu.code is not None
-    assert not cpu.code == "C1"
-    # Just set path to none after inserting an item. The server doesn't return the full path so you have no way to
-    # assign the correct value to this variable.
-    # This assert checks just that:
-    assert cpu.path is None
+    # the following lines convert a Item -> ItemToUpload
+    # and test some basic stuff
+    data = cpu.serializable()
+    del data["code"]
+    data["parent"] = data.get("location")[-1]
+    del data["location"]
+    assert data["parent"] == 'Table'
+    cpu_toUpload = ItemToUpload(data)
+    assert tarallo_session.add_item(cpu_toUpload)
+
 
     # Let's get the entire item again and check...
     cpu = tarallo_session.get_item(cpu.code)
-    assert cpu.path[-1:] == ['Table']
-    assert cpu.location == 'Table'
-
-    # This may seem redundant, but these are different feature types...
-    assert cpu.features["brand"] == "AMD"
-    assert cpu.features["type"] == "cpu"
-    assert cpu.features["cpu-socket"] == "am3"
-    assert cpu.features["frequency-hertz"] == 3000000000
 
 
 @raises(ValidationError)
 def test_add_item():
     tarallo_session = Tarallo(t_url, t_token)
-    ram = Item()
-    ram.code = "!N\\/@L!D"
-    ram.features["type"] = "ram"
-    ram.location = "Table"
-
+    data = {'code': "!N\\/@L!D",
+            'features': {'type': 'ram'},
+            'parent': 'Table'}
+    ram = ItemToUpload(data)
     tarallo_session.add_item(ram)
 
 
@@ -249,14 +281,14 @@ def test_travaso():
     assert type(item_r69) == Item
     assert item_r69.code == 'R69'
     assert isinstance(item_r69.features, dict)
-    assert item_r69.location == 'RamBox'
+    assert item_r69.location[-1] == 'RamBox'
 
     item_r188 = tarallo_session.get_item("R188")
     assert item_r188 is not None
     assert type(item_r188) == Item
     assert item_r188.code == 'R188'
     assert isinstance(item_r188.features, dict)
-    assert item_r188.location == 'RamBox'
+    assert item_r188.location[-1] == 'RamBox'
 
     tarallo_session.move("R69", "schifomacchina")
     tarallo_session.move("R188", "schifomacchina")
