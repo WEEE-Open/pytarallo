@@ -11,8 +11,6 @@ from .ItemToUpload import ItemToUpload
 from .Product import Product
 from .ProductToUpload import ProductToUpload
 
-VALID_RESPONSES = [200, 201, 204, 400, 403, 404]
-
 
 class Tarallo(object):
     """This class handles the Tarallo session"""
@@ -33,7 +31,7 @@ class Tarallo(object):
     def __check_response(self):
         if self.response.status_code == 401:
             raise AuthenticationError
-        if self.response.status_code not in VALID_RESPONSES:
+        if self.response.status_code >= 500:
             raise ServerError
 
     # requests.Session() wrapper methods
@@ -267,6 +265,27 @@ class Tarallo(object):
         """
         item_status = self.put(f'/v2/deleted/{self.urlencode(code)}/parent', json.dumps(location)).status_code
         if item_status == 201:
+            return True
+        else:
+            return False
+
+    def bulk_add(self, upload, identifier: Optional[str] = None, overwrite: bool = False):
+        """
+        Perform a bulk add, to import items from peracotta
+
+        :param upload: The parsed json
+        :param identifier: Optional text to identify the computer
+        :param overwrite: Overwrite if there's a computer with the same identifier
+        :return:
+        """
+        url = '/v2/bulk/add'
+        if identifier:
+            url += '/' + self.urlencode(identifier)
+        if overwrite:
+            url += '?overwrite=true'
+        result = self.post(url, json.dumps(upload)).status_code
+        # 409 if is a duplicate
+        if result == 204:
             return True
         else:
             return False

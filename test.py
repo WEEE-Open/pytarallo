@@ -1,3 +1,5 @@
+import json
+from datetime import datetime
 from collections import Iterable
 from os import environ as env
 from nose.tools import *
@@ -405,3 +407,137 @@ def test_codes_by_feature_invalid_feature():
     tarallo_session = Tarallo(t_url, t_token)
     # Cannot do an exact match on float/double values
     tarallo_session.get_codes_by_feature("psu-vol", "17.3")
+
+
+def test_bulk_add():
+    tarallo_session = Tarallo(t_url, t_token)
+    # Cannot do an exact match on float/double values
+    upload = """[
+  {
+    "type": "I",
+    "features": {
+      "brand": "OilData",
+      "model": "Grand Junction 62000",
+      "variant": "default",
+      "type": "case",
+      "working": "yes"
+    },
+    "contents": [
+      {
+        "features": {
+          "brand": "USAStek computer inc.",
+          "model": "P5KPL-VM",
+          "variant": "default",
+          "mac": "00:1b:33:42:42:42",
+          "sn": "MT707BK05828930",
+          "type": "motherboard",
+          "working": "yes"
+        },
+        "contents": [
+          {
+            "code": "C251",
+            "features": {
+              "brand": "Intel",
+              "model": "Core 2 Duo E8200",
+              "variant": "default",
+              "type": "cpu",
+              "working": "yes"
+            }
+          },
+          {
+            "features": {
+              "brand": "Samsung",
+              "model": "M3 78T2863DZS-CF7",
+              "sn": "589442786",
+              "variant": "default",
+              "type": "ram",
+              "working": "yes"
+            }
+          },
+          {
+            "code": "R597",
+            "features": {
+              "brand": "Samsung",
+              "model": "M3 78T2953EZ3-CF7",
+              "sn": "1231847313",
+              "variant": "default",
+              "type": "ram",
+              "working": "yes"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "P",
+    "brand": "Samsung",
+    "model": "M3 78T2953EZ3-CF7",
+    "variant": "default",
+    "features": {
+      "capacity-byte": 1073741824,
+      "color": "green",
+      "frequency-hertz": 800000000,
+      "ram-ecc": "no",
+      "ram-form-factor": "dimm",
+      "ram-timings": "6-6-6-18 as DDR2-800",
+      "ram-type": "ddr2",
+      "type": "ram"
+    }
+  },
+  {
+    "type": "P",
+    "brand": "Intel",
+    "model": "Core 2 Duo E8200",
+    "variant": "default",
+    "features": {
+      "core-n": 2,
+      "cpu-socket": "lga775",
+      "frequency-hertz": 2660000000,
+      "isa": "x86-64",
+      "thread-n": 2,
+      "type": "cpu"
+    }
+  },
+  {
+    "type": "P",
+    "brand": "USAStek computer inc.",
+    "model": "P5KPL-VM",
+    "variant": "default",
+    "features": {
+      "color": "golden",
+      "cpu-socket": "lga775",
+      "ethernet-ports-1000m-n": 1,
+      "ide-ports-n": 1,
+      "integrated-graphics-brand": "Intel",
+      "integrated-graphics-model": "82G33/G31 Express",
+      "key-bios-setup": "Del",
+      "mini-jack-ports-n": 3,
+      "motherboard-form-factor": "microatx",
+      "parallel-ports-n": 1,
+      "pci-sockets-n": 2,
+      "pcie-sockets-n": 2,
+      "ps2-ports-n": 2,
+      "psu-connector-cpu": "4pin",
+      "psu-connector-motherboard": "atx-24pin",
+      "ram-form-factor": "dimm",
+      "ram-type": "ddr2",
+      "sata-ports-n": 4,
+      "serial-ports-n": 1,
+      "type": "motherboard",
+      "usb-ports-n": 4,
+      "vga-ports-n": 1
+    }
+  }
+]"""
+
+    # Upload succeeds
+    assert tarallo_session.bulk_add(json.loads(upload))
+
+    identifier = f"pytarallo test {datetime.now().strftime('%H:%M:%S.%f')}"
+    # Upload succeeds again
+    assert tarallo_session.bulk_add(json.loads(upload), identifier)
+    # Upload fails, duplicate
+    assert not tarallo_session.bulk_add(json.loads(upload), identifier)
+    # Upload succeeds with overwrite
+    assert tarallo_session.bulk_add(json.loads(upload), identifier, True)
