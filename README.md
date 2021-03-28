@@ -92,3 +92,6 @@ You may also get pytarallo through PyPI by using the command `pip install pytara
     - you having an account on pypi.org
     - your account being owner or maintainer of the pytarallo package
     - you entering your username and password when prompted by twine
+
+Remember to  
+7. `rm -rf dist/` before uploading a new release
