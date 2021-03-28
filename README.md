@@ -67,7 +67,8 @@ You may also get pytarallo through PyPI by using the command `pip install pytara
     ```
     git clone https://github.com/WEEE-Open/pytarallo && cd pytarallo
     ```
-2. Update the setup.py so that it contains the correct version and other info (including dependencies)
+2. Update the setup.py so that it contains the correct version and other info (including dependencies).  
+   You should update at least `version` and `download_url`.
     ```
     vim setup.py
     ```
