@@ -6,7 +6,6 @@ from .Product import Product
 
 
 class Item(ItemBase):
-    """This class implements a pseudo-O(R)M"""
     code: str
     location: List[str]
     product: Optional[Product]

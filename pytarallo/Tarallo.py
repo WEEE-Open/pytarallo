@@ -85,7 +85,7 @@ class Tarallo(object):
         return self.response
 
     @staticmethod
-    def urlencode(part):
+    def urlencode(part: str):
         part = str(part)
         return urllib.parse.quote(part, safe='')
 
@@ -98,7 +98,7 @@ class Tarallo(object):
         except AuthenticationError:
             return self.response.status_code
 
-    def get_item(self, code, depth_limit=None):
+    def get_item(self, code: str, depth_limit: Optional[int] = None):
         """
         Return an Item instance received from the server
         """
@@ -112,7 +112,7 @@ class Tarallo(object):
         elif self.response.status_code == 404:
             raise ItemNotFoundError(f"Item {code} doesn't exist")
 
-    def get_product_list(self, brand, model):
+    def get_product_list(self, brand: str, model: str):
         """returns an list of Product retrieved from the server
         Args:
             self, brand: str, model: str, variant: str
@@ -130,7 +130,7 @@ class Tarallo(object):
         elif self.response.status_code == 404:
             raise ProductNotFoundError("Product doesn't exists.")
 
-    def get_product(self, brand, model, variant="default"):
+    def get_product(self, brand: str, model: str, variant: str = "default"):
         """Retrieve a product from the server
         Returns a Product
 
@@ -194,7 +194,7 @@ class Tarallo(object):
         elif self.response.status_code == 404:
             raise ItemNotFoundError(f"Item {code} doesn't exist")
 
-    def update_product_features(self, brand, model, variant, features: dict):
+    def update_product_features(self, brand: str, model: str, variant: str, features: dict):
         bmv = f"{self.urlencode(brand)}/{self.urlencode(model)}/{self.urlencode(variant)}"
         url = f"/v2/products/{bmv}/features"
         self.patch(url, json.dumps(features))
@@ -205,7 +205,7 @@ class Tarallo(object):
         elif self.response.status_code == 404:
             raise ProductNotFoundError(f"Product doesn't exist")
 
-    def move(self, code, location):
+    def move(self, code: str, location: str):
         """
         Move an item to another location
         """
@@ -225,7 +225,7 @@ class Tarallo(object):
         else:
             raise RuntimeError(f"Move failed with {move_status}")
 
-    def delete_product(self, brand, model, variant):
+    def delete_product(self, brand: str, model: str, variant: str):
         """
         send a DELETE request to the server to remove a product
         """
@@ -239,7 +239,7 @@ class Tarallo(object):
         else:
             return False
 
-    def remove_item(self, code):
+    def remove_item(self, code: str):
         """
         Remove an item from the database
 
@@ -257,7 +257,7 @@ class Tarallo(object):
         else:
             return False
 
-    def restore_item(self, code, location):
+    def restore_item(self, code: str, location: str):
         """
         Restores a deleted item
 
@@ -300,7 +300,7 @@ class Tarallo(object):
             self.move(inner_code, location)
         return True
 
-    def get_history(self, code, limit: Optional[int] = None):
+    def get_history(self, code: str, limit: Optional[int] = None):
         url = f'/v2/items/{self.urlencode(code)}/history'
         if limit is not None:
             url += '?length=' + str(int(limit))
