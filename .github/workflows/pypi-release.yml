@@ -24,29 +24,29 @@ jobs:
         run: |
           echo "from setuptools import setup
 
-                setup(
-                    name='pytarallo',
-                    packages=['pytarallo'],
-                    version='${{ env.RELEASE_VERSION }}',
-                    url='https://github.com/WEEE-Open/pytarallo',
-                    download_url='https://github.com/WEEE-Open/pytarallo/archive/${{ env.RELEASE_VERSION }}.tar.gz',
-                    license='MIT',
-                    author='Various people',
-                    author_email='weeeopen@polito.it',
-                    description='Python API for the T.A.R.A.L.L.O. Inventory System',
-                    keywords=['WEEEOpen', 'python-tarallo', 'T.A.R.A.L.L.O.', 'Inventory system'],
-                    install_requires=['requests'],
-                    extras_require={
-                        'dev': ['nose', 'python-dotenv']
-                    },
-                    classifiers=[
-                        'Development Status :: 4 - Beta',
-                        'Intended Audience :: Developers',
-                        'Topic :: Software Development :: Build Tools',
-                        'License :: OSI Approved :: MIT License',
-                        'Programming Language :: Python :: 3.6',
-                    ],
-                )" > setup.py
+          setup(
+              name='pytarallo',
+              packages=['pytarallo'],
+              version='${{ env.RELEASE_VERSION }}',
+              url='https://github.com/WEEE-Open/pytarallo',
+              download_url='https://github.com/WEEE-Open/pytarallo/archive/${{ env.RELEASE_VERSION }}.tar.gz',
+              license='MIT',
+              author='Various people',
+              author_email='weeeopen@polito.it',
+              description='Python API for the T.A.R.A.L.L.O. Inventory System',
+              keywords=['WEEEOpen', 'python-tarallo', 'T.A.R.A.L.L.O.', 'Inventory system'],
+              install_requires=['requests'],
+              extras_require={
+                  'dev': ['nose', 'python-dotenv']
+              },
+              classifiers=[
+                  'Development Status :: 4 - Beta',
+                  'Intended Audience :: Developers',
+                  'Topic :: Software Development :: Build Tools',
+                  'License :: OSI Approved :: MIT License',
+                  'Programming Language :: Python :: 3.6',
+              ],
+          )" > setup.py
 
       - name: See contents of setup.py used for this release
         run: cat setup.py
