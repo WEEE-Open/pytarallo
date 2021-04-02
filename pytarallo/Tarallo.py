@@ -86,7 +86,6 @@ class Tarallo(object):
 
     @staticmethod
     def urlencode(part: str):
-        part = str(part)
         return urllib.parse.quote(part, safe='')
 
     def status(self):
