@@ -1,5 +1,5 @@
 # see https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
-name: Publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+name: Publish new release of Pytarallo to PyPI
 on:
   push:
     tags:
@@ -47,7 +47,9 @@ jobs:
                         'Programming Language :: Python :: 3.6',
                     ],
                 )" > setup.py
-        cat setup.py
+
+      - name: See contents of setup.py used for this release
+        run: cat setup.py
 
       - name: Set up Python
         uses: actions/setup-python@v1
