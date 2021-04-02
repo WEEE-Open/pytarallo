@@ -60,7 +60,7 @@ jobs:
         run: python -m pip install build --user
 
       - name: Build a binary wheel and a source tarball
-        run: python -m build --sdist --wheel --outdir dist/ pytarallo
+        run: python -m build --sdist --wheel --outdir dist/ .
 
 # e-caste: I don't have a Test PyPI account and I don't know if it will be useful to have one,
 # only publishing to the real PyPI for now
