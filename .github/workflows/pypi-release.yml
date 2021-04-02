@@ -3,7 +3,7 @@ name: Publish new release of Pytarallo to PyPI
 on:
   push:
     tags:
-      - '*'
+      - 'v*.*.*'
 
 jobs:
   build-and-publish:
