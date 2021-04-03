@@ -3,6 +3,10 @@ name: Python tests
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - '.gitignore'
   pull_request:
     branches: [ master ]
 
