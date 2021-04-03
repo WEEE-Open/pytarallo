@@ -63,6 +63,17 @@ You may also get pytarallo through PyPI by using the command `pip install pytara
 
 ## For devs, to publish this repo on PyPI
 
+### Automatic method
+
+1. Click [here](https://github.com/WEEE-Open/pytarallo/releases/new) (or on the right of this page, on "Releases", then "Draft a new release").  
+2. Enter the version tag with format "vX.Y.Z" without double quotes.  
+3. Optionally enter a release title and a release description.
+4. You can follow the build and release process in the Actions tab at the top.
+
+⚠️ Wait for the automatic tests to complete succesfully that run after pushing a new commit before releasing a broken library on PyPI.
+
+### Manual method - DEPRECATED
+
 1. Clone the repo locally
     ```
     git clone https://github.com/WEEE-Open/pytarallo && cd pytarallo
