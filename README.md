@@ -70,7 +70,7 @@ You may also get pytarallo through PyPI by using the command `pip install pytara
 3. Optionally enter a release title and a release description.
 4. You can follow the build and release process in the Actions tab at the top.
 
-⚠️ Wait for the automatic tests to complete succesfully that run after pushing a new commit before releasing a broken library on PyPI.
+⚠️ Wait for the automatic tests that run after pushing a new commit to complete succesfully before releasing a broken library on PyPI.
 
 ### Manual method - DEPRECATED
 
