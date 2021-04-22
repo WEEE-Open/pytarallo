@@ -1,3 +1,6 @@
+from requests.exceptions import ConnectionError
+
+
 class ItemNotFoundError(Exception):
     def __init__(self, code):
         self.code = code
@@ -64,3 +67,14 @@ class NoInternetConnectionError(Exception):
     Your computer is not connected to the Internet, hence it can't connect to the T.A.R.A.L.L.O.
     """
     pass
+
+
+# custom Python decorator
+def raises_no_internet_connection_error(func):
+    def inner(*args, **kwargs):
+        try:
+            res = func(*args, **kwargs)
+            return res
+        except ConnectionError:
+            raise NoInternetConnectionError("Your computer is not connected to the Internet.")
+    return inner
