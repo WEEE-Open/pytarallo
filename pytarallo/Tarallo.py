@@ -36,6 +36,7 @@ class Tarallo(object):
 
     # requests.Session() wrapper methods
     # These guys implement further checks
+    @raises_no_internet_connection_error
     def get(self, url: str) -> requests.Response:
         url = self.__prepare_url(url)
         headers = {"Authorization": "Token " + self.token}
@@ -44,6 +45,7 @@ class Tarallo(object):
         self.__check_response()
         return self.response
 
+    @raises_no_internet_connection_error
     def delete(self, url: str) -> requests.Response:
         url = self.__prepare_url(url)
         headers = {"Authorization": "Token " + self.token}
@@ -51,6 +53,7 @@ class Tarallo(object):
         self.__check_response()
         return self.response
 
+    @raises_no_internet_connection_error
     def post(self, url: str, data, headers=None) -> requests.Response:
         if headers is None:
             headers = {}
@@ -62,6 +65,7 @@ class Tarallo(object):
         self.__check_response()
         return self.response
 
+    @raises_no_internet_connection_error
     def put(self, url: str, data, headers=None) -> requests.Response:
         if headers is None:
             headers = {}
@@ -73,6 +77,7 @@ class Tarallo(object):
         self.__check_response()
         return self.response
 
+    @raises_no_internet_connection_error
     def patch(self, url: str, data, headers=None) -> requests.Response:
         if headers is None:
             headers = {}
