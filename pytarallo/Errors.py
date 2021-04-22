@@ -57,3 +57,10 @@ class InvalidObjectError(Exception):
     Object can be an Item, a Product, or other.
     """
     pass
+
+
+class NoInternetConnectionError(Exception):
+    """
+    Your computer is not connected to the Internet, hence it can't connect to the T.A.R.A.L.L.O.
+    """
+    pass
