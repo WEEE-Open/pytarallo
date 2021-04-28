@@ -38,11 +38,14 @@ class Item(ItemBase):
             # setattr(self, k, v)
             self.features[k] = v
 
-        if data.get('location'):
-            self.location = data['location']
+        if top_level:
+            if data.get('location'):
+                self.location = data['location']
+            else:
+                self.location = []
         else:
-            if top_level:
-                raise InvalidObjectError("Location is missing, not even empty")
+            if data.get('location'):
+                raise InvalidObjectError("Location is set for a not top level item")
 
         # load the optional list of items (content) of the item from data
         if data.get('contents'):
