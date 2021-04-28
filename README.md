@@ -75,28 +75,32 @@ You may also get pytarallo through PyPI by using the command `pip install pytara
 ### Manual method - DEPRECATED
 
 1. Clone the repo locally
-    ```
+    ```bash
     git clone https://github.com/WEEE-Open/pytarallo && cd pytarallo
     ```
 2. Update the setup.py so that it contains the correct version and other info (including dependencies).  
    You should update at least `version` and `download_url`.
-    ```
+    ```bash
     vim setup.py
     ```
 3. Enter in the virtual environment
-    ```
+    ```bash
     source venv/bin/activate
     ```
 4. Install required packages for publishing on PyPI
-    ```
+    ```bash
     pip install setuptools wheel twine
     ```
-5. Build the .tar.gz package
+5. Remove old builds
+    ```bash
+    rm dist/*
     ```
+7. Build the .tar.gz package
+    ```bash
     python setup.py sdist bdist_wheel
     ```
-6. Upload the output packages to PyPI:  
-    ```
+7. Upload the output packages to PyPI:  
+    ```bash
     twine upload dist/*
     ```
 
@@ -104,6 +108,3 @@ You may also get pytarallo through PyPI by using the command `pip install pytara
     - you having an account on pypi.org
     - your account being owner or maintainer of the pytarallo package
     - you entering your username and password when prompted by twine
-
-Remember to  
-7. `rm -rf dist/` before uploading a new release
