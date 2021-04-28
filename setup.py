@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='pytarallo',
     packages=['pytarallo'],
-    version='2.2.0',
+    version='2.3.1',
     url='https://github.com/WEEE-Open/pytarallo',
     download_url='https://github.com/WEEE-Open/pytarallo/archive/2.1.2.tar.gz',
     license='MIT',
