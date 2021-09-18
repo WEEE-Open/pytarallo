@@ -108,7 +108,7 @@ class Tarallo(object):
         """
         url = f'/v2/items/{self.urlencode(code)}?separate'  # try an Item without product
         if depth_limit is not None:
-            url += '?depth=' + str(int(depth_limit))
+            url += '&depth=' + str(int(depth_limit))
         self.get(url)
         if self.response.status_code == 200:
             item = Item(json.loads(self.response.content))
