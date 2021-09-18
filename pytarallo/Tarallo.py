@@ -214,7 +214,9 @@ class Tarallo(object):
         Move an item to another location
         """
         move_status = self.put(f'v2/items/{self.urlencode(code)}/parent', json.dumps(location)).status_code
-        if move_status == 204 or move_status == 201:
+        if move_status == 204 or move_status == 201 or move_status == 200:
+            # 200 is the one that's currently used, the response contains some potentially
+            # useful info which is just discarded because we don't need it anywhere rigth now
             return True
         elif move_status == 400:
             raise ValidationError(f"Cannot move {code} into {location}")
