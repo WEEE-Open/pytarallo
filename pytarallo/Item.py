@@ -34,9 +34,14 @@ class Item(ItemBase):
         else:
             self.product = None
 
-        for k, v in data['features'].items():
-            # setattr(self, k, v)
-            self.features[k] = v
+        # it's an empty *list* if there are no features,
+        # since empty dict and list are the same on the server.
+        # We need to check for lenght because list doesn't have items()
+        # and would throw an error otherwise.
+        if len(data['features']) > 0:
+            for k, v in data['features'].items():
+                # setattr(self, k, v)
+                self.features[k] = v
 
         if top_level:
             if data.get('location'):
