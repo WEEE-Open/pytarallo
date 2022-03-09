@@ -231,6 +231,28 @@ class Tarallo(object):
         else:
             raise RuntimeError(f"Move failed with {move_status}")
 
+    def lose(self, code: str):
+        """
+        Move an item to another location
+        """
+        lose_status = self.delete(f'v2/items/{self.urlencode(code)}/parent').status_code
+        if lose_status == 204:
+            return True
+        elif lose_status == 400:
+            response_json = json.loads(self.response.content)
+            if "message" in response_json:
+                raise ValidationError(f"Cannot lose {code}: {response_json['message']}")
+            else:
+                raise ValidationError(f"Cannot lose {code}")
+        elif lose_status == 404:
+            response_json = json.loads(self.response.content)
+            if 'item' in response_json:
+                raise ItemNotFoundError(f"Item {response_json['item']} doesn't exist")
+            else:
+                raise ServerError("Server didn't find an item, but isn't telling us which one")
+        else:
+            raise RuntimeError(f"Move failed with {lose_status}")
+
     def delete_product(self, brand: str, model: str, variant: str):
         """
         send a DELETE request to the server to remove a product
